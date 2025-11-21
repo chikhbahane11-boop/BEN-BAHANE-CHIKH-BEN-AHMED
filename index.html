@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -17,35 +17,52 @@
             },
             colors: {
               legal: {
-                50: '#f4f6f8',
-                100: '#e4e8ed',
-                200: '#c5ced8',
-                300: '#9baab9',
-                400: '#6b7f94',
-                500: '#4b6076',
-                600: '#3a4b5f',
-                700: '#2f3d4d',
-                800: '#28323f',
-                900: '#242b35',
+                50: '#f8fafc',
+                100: '#f1f5f9',
+                200: '#e2e8f0',
+                300: '#cbd5e1',
+                400: '#94a3b8',
+                500: '#64748b',
+                600: '#475569',
+                700: '#334155',
+                800: '#1e293b',
+                900: '#0f172a',
               },
               gold: {
-                500: '#d4af37',
-                600: '#b4942d',
+                50: '#fffbeb',
+                100: '#fef3c7',
+                200: '#fde68a',
+                300: '#fcd34d',
+                400: '#fbbf24',
+                500: '#f59e0b',
+                600: '#d97706',
+                700: '#b45309',
+                800: '#92400e',
+                900: '#78350f',
               }
             },
+            boxShadow: {
+              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+              'glow': '0 0 15px rgba(245, 158, 11, 0.3)',
+            },
             animation: {
-              'fade-in': 'fadeIn 0.5s ease-out',
+              'fade-in': 'fadeIn 0.6s ease-out forwards',
+              'slide-up': 'slideUp 0.5s ease-out forwards',
               'bounce-in': 'bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
             keyframes: {
               fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               bounceIn: {
-                '0%': { transform: 'scale(0.3)', opacity: '0' },
-                '50%': { transform: 'scale(1.05)' },
-                '70%': { transform: 'scale(0.9)' },
+                '0%': { transform: 'scale(0.9)', opacity: '0' },
+                '50%': { transform: 'scale(1.02)' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
               }
             }
@@ -54,32 +71,70 @@
       }
     </script>
     <style>
-      /* تمكين التمرير المخصص */
+      /* Background Pattern */
+      body {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+      
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1; 
-        border-radius: 4px;
+        border-radius: 10px;
+        border: 2px solid #f8fafc;
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8; 
       }
+      
+      /* Glossary Highlight */
       .highlight-term {
-        border-bottom: 2px dotted #d4af37;
+        border-bottom: 2px dotted #d97706;
         cursor: help;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
+        padding: 0 2px;
+        border-radius: 4px;
       }
       .highlight-term:hover {
-        background-color: #fef3c7;
-        color: #b45309;
+        background-color: #fffbeb;
+        color: #92400e;
+        border-bottom-style: solid;
+      }
+      
+      /* Security */
+      body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      input, textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
       }
     </style>
     
+    <script>
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if(e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
+          e.preventDefault();
+        }
+      });
+    </script>
   <script type="importmap">
 {
   "imports": {
@@ -93,7 +148,7 @@
 }
 </script>
 </head>
-  <body class="bg-legal-50 text-legal-900 font-sans antialiased overflow-hidden selection:bg-gold-500 selection:text-white">
+  <body class="text-legal-900 font-sans antialiased overflow-hidden selection:bg-gold-500 selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>
   </body>
