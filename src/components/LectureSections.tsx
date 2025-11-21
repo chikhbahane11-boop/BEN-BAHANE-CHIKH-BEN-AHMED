@@ -1,15 +1,14 @@
-
 import React, { useState } from 'react';
 import { 
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
   HelpCircle, Play, XCircle, Trophy, Book, BookOpen, Lock, Unlock, Download,
   MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick,
-  ClipboardCheck
+  ClipboardCheck, History, Users, Zap, Landmark, Printer
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, SOCIETY_COMPONENTS, HISTORY_EVENTS, SUBJECTS_DATA, 
   MODERN_EXAMPLES, CLASSIFICATION_GAME_ITEMS, INTRO_STORY, GLOSSARY, 
-  THEORETICAL_SUMMARY, COMPONENT_ENRICHMENT, INTRO_ENRICHMENT, 
+  SUMMARY_CARDS, COMPONENT_ENRICHMENT, INTRO_ENRICHMENT, 
   SUBJECTS_ENRICHMENT, MODERN_ENRICHMENT, REVIEW_CONTENT, INTRO_DEEP_DIVE, 
   COMPONENTS_DEEP_DIVE, SUBJECTS_DEEP_DIVE, MODERN_DEEP_DIVE, LEARNING_OBJECTIVES
 } from '../constants';
@@ -512,12 +511,96 @@ export const ReviewSection: React.FC = () => {
   );
 };
 
-export const SummarySection: React.FC = () => (
-  <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-legal-200 mb-12">
-    <div className="bg-legal-900 text-white p-8 flex justify-between"><h2 className="text-3xl font-bold flex gap-3"><Book className="text-gold-500"/> الملخص النظري</h2><button onClick={() => window.print()} className="bg-white/10 px-4 py-2 rounded font-bold flex gap-2"><Download/> طباعة</button></div>
-    <div className="p-10"><div className="prose prose-lg max-w-none text-legal-800 leading-loose whitespace-pre-line">{THEORETICAL_SUMMARY}</div></div>
-  </div>
-);
+export const SummarySection: React.FC = () => {
+  return (
+    <div className="space-y-8 pb-12">
+      <div className="bg-legal-900 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h2 className="text-3xl font-black mb-2 flex items-center gap-3">
+            <Book className="text-gold-500" size={32} />
+            الملخص النظري الشامل
+          </h2>
+          <p className="text-legal-300 text-lg">خلاصة المحاضرة في نقاط مركزة للحفظ والمراجعة.</p>
+        </div>
+        <button 
+          onClick={() => window.print()} 
+          className="bg-white text-legal-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-gold-400 transition-colors shadow-lg"
+        >
+          <Printer size={20} />
+          طباعة الملخص
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {SUMMARY_CARDS.map((card, idx) => (
+          <div key={idx} className="bg-white rounded-3xl shadow-soft overflow-hidden border border-legal-100 hover:shadow-xl transition-shadow">
+            <div className={`h-2 bg-gradient-to-r ${card.colorClass}`} />
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white bg-gradient-to-br ${card.colorClass}`}>
+                  <card.icon size={24} />
+                </div>
+                <h3 className="text-2xl font-black text-legal-900">{card.title}</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {card.content.map((section, sIdx) => (
+                  <div key={sIdx} className="relative">
+                    {section.subtitle && <h4 className="font-bold text-legal-400 uppercase text-xs tracking-widest mb-3">{section.subtitle}</h4>}
+                    
+                    {section.type === 'list' && (
+                      <ul className="space-y-3">
+                        {section.items.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3 text-legal-700 font-medium text-lg">
+                            <span className={`mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br ${card.colorClass}`} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {section.type === 'cards' && (
+                      <div className="grid gap-3">
+                         {section.items.map((item, i) => {
+                           const [title, desc] = item.split(':');
+                           return (
+                             <div key={i} className="bg-legal-50 p-4 rounded-xl border border-legal-100">
+                               <span className="font-black text-legal-900 block mb-1">{title}</span>
+                               {desc && <span className="text-legal-600 block">{desc}</span>}
+                             </div>
+                           )
+                         })}
+                      </div>
+                    )}
+
+                    {section.type === 'timeline' && (
+                       <div className="relative border-r-2 border-legal-100 mr-3 space-y-6 py-2">
+                         {section.items.map((item, i) => {
+                            const [title, desc] = item.split(':');
+                            return (
+                              <div key={i} className="relative pr-6">
+                                <span className={`absolute -right-[9px] top-2 w-4 h-4 rounded-full border-2 border-white shadow-sm bg-gradient-to-br ${card.colorClass}`} />
+                                <span className="font-bold text-legal-900 block">{title}</span>
+                                <span className="text-legal-600">{desc}</span>
+                              </div>
+                            )
+                         })}
+                       </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-center text-legal-400 text-sm mt-8 font-mono">
+        تم إعداد هذا الملخص بناءً على مطبوعة د. إسالمة محمد أمين
+      </div>
+    </div>
+  );
+};
 
 export const ExitTicket: React.FC = () => {
   const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');

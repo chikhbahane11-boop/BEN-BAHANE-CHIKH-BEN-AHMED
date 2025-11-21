@@ -91,3 +91,15 @@ export interface ModernExampleItem {
   new: string;
   period: string;
 }
+
+export interface SummaryCardData {
+  id: string;
+  title: string;
+  icon: LucideIcon;
+  colorClass: string;
+  content: {
+    subtitle?: string;
+    items: string[];
+    type: 'list' | 'timeline' | 'cards';
+  }[];
+}
