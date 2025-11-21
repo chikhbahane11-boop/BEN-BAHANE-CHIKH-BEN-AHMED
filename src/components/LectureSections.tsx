@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
@@ -295,22 +296,96 @@ export const HistorySection: React.FC = () => {
 };
 
 export const SubjectsSection: React.FC = () => {
-  const [mode, setMode] = useState<'learn'|'play'>('learn');
+  const [mode, setMode] = useState<'learn' | 'play'>('learn');
+  const [score, setScore] = useState(0);
+  const [gameIndex, setGameIndex] = useState(0);
+  const [lastFeedback, setLastFeedback] = useState<{msg: string, correct: boolean} | null>(null);
+  const [isFinished, setIsFinished] = useState(false);
+
+  const handleGameChoice = (type: 'state' | 'org' | 'special') => {
+    const item = CLASSIFICATION_GAME_ITEMS[gameIndex];
+    const isCorrect = item.type === type;
+    if (isCorrect) setScore(s => s + 1);
+    setLastFeedback({ msg: isCorrect ? item.feedback : 'خطأ! حاول التذكر.', correct: isCorrect });
+    
+    setTimeout(() => {
+      if (gameIndex < CLASSIFICATION_GAME_ITEMS.length - 1) {
+        setGameIndex(g => g + 1);
+        setLastFeedback(null);
+      } else setIsFinished(true);
+    }, 1500);
+  };
+
+  const resetGame = () => {
+    setGameIndex(0);
+    setScore(0);
+    setIsFinished(false);
+    setLastFeedback(null);
+    setMode('learn');
+  };
+
+  if (mode === 'play') {
+    return (
+      <div className="space-y-10 pb-12">
+         <div className="bg-legal-900 rounded-3xl shadow-2xl p-8 max-w-4xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500 min-h-[500px] flex flex-col justify-center">
+          {!isFinished ? (
+            <div className="animate-fade-in">
+              <div className="flex justify-between text-legal-400 mb-8 text-sm font-mono px-4">
+                <span>السؤال {gameIndex + 1} من {CLASSIFICATION_GAME_ITEMS.length}</span>
+                <span>النقاط: {score}</span>
+              </div>
+              <h3 className="text-legal-300 mb-6 text-xl">ما هو التصنيف القانوني لهذا الكيان؟</h3>
+              <h2 className="text-5xl font-black mb-12 text-white">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
+              
+              {lastFeedback ? (
+                <div className={`p-6 rounded-2xl text-2xl font-bold animate-bounce-in mx-auto max-w-xl ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                  {lastFeedback.msg}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                  <button onClick={() => handleGameChoice('state')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">دولة (شخص أصلي)</button>
+                  <button onClick={() => handleGameChoice('org')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">منظمة (شخص وظيفي)</button>
+                  <button onClick={() => handleGameChoice('special')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">وضع خاص</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-8 animate-fade-in">
+              <div className="w-24 h-24 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-6 text-legal-900 animate-bounce"><Trophy size={48} /></div>
+              <h2 className="text-4xl font-black mb-4">انتهت اللعبة!</h2>
+              <p className="text-2xl mb-10 text-legal-300">نتيجتك النهائية: <span className="text-gold-400 font-black">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
+              <button onClick={resetGame} className="bg-white text-legal-900 px-10 py-4 rounded-full font-bold text-xl hover:bg-gold-400 transition-all shadow-lg hover:scale-105">العودة للدرس</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-10 pb-12">
        <div className="grid lg:grid-cols-3 gap-8">
         {SUBJECTS_DATA.map((subj, idx) => (
-          <div key={idx} className="bg-white rounded-3xl shadow-soft p-8 border border-legal-100 hover:shadow-xl transition-all hover:-translate-y-2">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 ${idx===0?'bg-blue-600':idx===1?'bg-purple-600':'bg-teal-600'}`}>{idx===0?<Building2/>:idx===1?<Users2/>:<ShieldCheck/>}</div>
+          <div key={idx} className="bg-white rounded-3xl shadow-soft p-8 border border-legal-100 hover:shadow-xl transition-all hover:-translate-y-2 group">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 transition-transform group-hover:scale-110 ${idx===0?'bg-blue-600':idx===1?'bg-purple-600':'bg-teal-600'}`}>{idx===0?<Building2 size={32}/>:idx===1?<Users2 size={32}/>:<ShieldCheck size={32}/>}</div>
             <h3 className="text-2xl font-black text-legal-900 mb-3">{subj.type}</h3>
-            <p className="text-legal-600 mb-6 h-16"><GlossaryText text={subj.desc} /></p>
-            <div className="flex flex-wrap gap-2 pt-4 border-t">{subj.elements.map((el,i)=><span key={i} className="text-xs font-bold bg-legal-50 px-3 py-1 rounded-full">{el}</span>)}</div>
+            <p className="text-legal-600 mb-6 h-16 leading-relaxed"><GlossaryText text={subj.desc} /></p>
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-legal-50">{subj.elements.map((el,i)=><span key={i} className="text-xs font-bold bg-legal-50 px-3 py-1 rounded-full text-legal-600">{el}</span>)}</div>
           </div>
         ))}
        </div>
        <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
-       <div className="bg-legal-900 rounded-3xl p-10 text-white flex justify-between items-center cursor-pointer shadow-2xl" onClick={() => setMode('play')}><div><h3 className="text-3xl font-black mb-2">لعبة التصنيف</h3><p className="text-legal-300">اختبر معلوماتك</p></div><Play size={40} className="text-gold-500"/></div>
-       {mode==='play' && <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"><div className="text-white text-center"><h2 className="text-4xl font-bold mb-8">لعبة التصنيف (Demo)</h2><button onClick={() => setMode('learn')} className="bg-gold-500 text-black px-8 py-3 rounded-full font-bold">عودة</button></div></div>}
+       
+       <div className="bg-gradient-to-r from-legal-900 to-legal-800 rounded-3xl p-10 text-white flex flex-col md:flex-row justify-between items-center cursor-pointer shadow-2xl hover:shadow-gold-500/20 border border-legal-700 transition-all group" onClick={() => setMode('play')}>
+          <div className="mb-6 md:mb-0">
+            <h3 className="text-3xl font-black mb-2 flex items-center gap-3"><Trophy className="text-gold-500" size={32}/> لعبة الخبير الدولي</h3>
+            <p className="text-legal-300 text-lg">هل يمكنك تصنيف الكيانات الدولية بشكل صحيح؟</p>
+          </div>
+          <div className="bg-gold-500 text-legal-900 w-16 h-16 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg border-4 border-legal-800">
+            <Play size={32} fill="currentColor" className="ml-1"/>
+          </div>
+       </div>
+       
        <TeacherLockedPanel questions={SUBJECTS_DEEP_DIVE} />
     </div>
   );
