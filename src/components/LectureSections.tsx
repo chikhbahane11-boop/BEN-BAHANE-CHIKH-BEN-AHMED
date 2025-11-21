@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
   HelpCircle, Play, XCircle, Trophy, Book, BookOpen, Lock, Unlock, Download,
-  MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick
+  MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick,
+  ClipboardCheck
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, SOCIETY_COMPONENTS, HISTORY_EVENTS, SUBJECTS_DATA, 
@@ -352,4 +353,170 @@ export const SummarySection: React.FC = () => (
   </div>
 );
 
-export const ExitTicket: React.FC = () => (<SectionCard className="max-w-2xl mx-auto text-center"><h2 className="text-3xl font-black mb-8">بطاقة الخروج</h2><form className="space-y-6"><input className="w-full p-4 bg-legal-50 rounded-xl" placeholder="الاسم" /><textarea className="w-full p-4 bg-legal-50 rounded-xl" placeholder="ماذا تعلمت؟" /><button className="w-full py-4 bg-legal-900 text-white font-bold rounded-xl">إرسال</button></form></SectionCard>);
+export const ExitTicket: React.FC = () => {
+  const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({ name: '', learn: '', question: '' });
+  
+  // Mock database for demonstration
+  const [allResponses, setAllResponses] = useState([
+    { name: 'طالب 1', learn: 'الفرق بين المجتمع الدولي والوطني', question: 'هل الفيتو قانوني؟' },
+    { name: 'طالب 2', learn: 'أهمية معاهدة وستفاليا', question: 'كيف نشأت الأمم المتحدة؟' }
+  ]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'omar2016') {
+      setView('teacherView');
+      setError('');
+    } else {
+      setError('كلمة المرور خاطئة');
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if(formData.learn && formData.question) {
+        setAllResponses([...allResponses, formData]);
+        setSubmitted(true);
+    }
+  };
+
+  if (view === 'teacherAuth') {
+    return (
+      <SectionCard className="max-w-md mx-auto text-center">
+        <div className="w-16 h-16 bg-legal-100 text-legal-800 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock size={32} />
+        </div>
+        <h2 className="text-2xl font-bold mb-6 text-legal-900">دخول الأستاذ</h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+            <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-4 bg-legal-50 border border-legal-200 rounded-xl text-center font-mono text-lg focus:ring-2 focus:ring-gold-500 outline-none transition-all"
+                placeholder="الرمز السري"
+                autoFocus
+            />
+            {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
+            <div className="flex gap-3">
+                <button type="submit" className="flex-1 bg-legal-900 text-white py-3 rounded-xl font-bold hover:bg-legal-800 transition-colors">دخول</button>
+                <button type="button" onClick={() => setView('student')} className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">رجوع</button>
+            </div>
+        </form>
+      </SectionCard>
+    );
+  }
+
+  if (view === 'teacherView') {
+    return (
+       <SectionCard>
+         <div className="flex justify-between items-center mb-8 border-b pb-4">
+            <h2 className="text-2xl font-black text-legal-900 flex items-center gap-3">
+                <Unlock className="text-green-500" />
+                ردود الطلاب ({allResponses.length})
+            </h2>
+            <button onClick={() => { setView('student'); setPassword(''); }} className="text-red-500 font-bold text-sm hover:bg-red-50 px-4 py-2 rounded-lg transition-colors">تسجيل الخروج</button>
+         </div>
+         <div className="grid gap-4">
+            {allResponses.length === 0 && <p className="text-center text-gray-400 py-8">لا توجد ردود بعد.</p>}
+            {allResponses.map((res, i) => (
+                <div key={i} className="bg-legal-50 p-6 rounded-xl border border-legal-100 hover:border-gold-300 transition-colors">
+                    <div className="flex justify-between mb-2">
+                        <span className="font-bold text-legal-900">{res.name || 'مجهول'}</span>
+                        <span className="text-xs text-legal-400 font-mono">#{i+1}</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4 mt-3">
+                        <div className="bg-white p-3 rounded-lg border border-legal-200">
+                            <span className="block text-xs font-bold text-green-600 mb-1">تعلمت:</span>
+                            <p className="text-legal-700 text-sm">{res.learn}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border border-legal-200">
+                            <span className="block text-xs font-bold text-red-600 mb-1">سؤال:</span>
+                            <p className="text-legal-700 text-sm">{res.question}</p>
+                        </div>
+                    </div>
+                </div>
+            ))}
+         </div>
+       </SectionCard>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <SectionCard className="max-w-xl mx-auto text-center py-12">
+        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-in">
+            <CheckCircle2 size={48} />
+        </div>
+        <h2 className="text-3xl font-black text-legal-900 mb-4">تم استلام بطاقتك!</h2>
+        <p className="text-legal-600 text-lg mb-8">شكراً لمشاركتك الفعالة في درس اليوم.</p>
+        <button onClick={() => { setSubmitted(false); setFormData({name:'', learn:'', question:''}); }} className="text-legal-400 hover:text-legal-600 underline font-bold text-sm">إرسال بطاقة أخرى</button>
+        
+        <div className="mt-12 pt-6 border-t border-legal-100">
+            <button onClick={() => setView('teacherAuth')} className="text-xs text-legal-300 hover:text-legal-500 flex items-center gap-1 mx-auto transition-colors">
+                <Lock size={12} /> بوابة الأستاذ
+            </button>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  return (
+    <SectionCard className="max-w-3xl mx-auto border-t-8 border-legal-900">
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-black text-legal-900 mb-3 flex justify-center items-center gap-3">
+            <div className="bg-gold-500 text-white p-2 rounded-lg"><ClipboardCheck size={28}/></div>
+            بطاقة الخروج
+        </h2>
+        <p className="text-legal-500 text-lg">تذكرتك لمغادرة القاعة: شاركنا ماذا تعلمت وماذا بقي غامضاً.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+            <label className="block text-sm font-bold text-legal-700 mb-2">الاسم (اختياري)</label>
+            <input 
+                type="text" 
+                className="w-full p-4 bg-legal-50 border-2 border-transparent focus:bg-white focus:border-gold-400 rounded-xl outline-none transition-all font-bold text-legal-800"
+                placeholder="اكتب اسمك هنا..."
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+            />
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+            <div>
+                <label className="block text-sm font-bold text-legal-700 mb-2 flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500"/> شيء جديد تعلمته اليوم</label>
+                <textarea 
+                    required
+                    className="w-full p-4 bg-legal-50 border-2 border-transparent focus:bg-white focus:border-green-400 rounded-xl outline-none transition-all h-32 resize-none"
+                    placeholder="لخص أهم فكرة رسخت في ذهنك..."
+                    value={formData.learn}
+                    onChange={e => setFormData({...formData, learn: e.target.value})}
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-bold text-legal-700 mb-2 flex items-center gap-2"><HelpCircle size={16} className="text-red-500"/> سؤال أو نقطة غامضة</label>
+                <textarea 
+                    required
+                    className="w-full p-4 bg-legal-50 border-2 border-transparent focus:bg-white focus:border-red-400 rounded-xl outline-none transition-all h-32 resize-none"
+                    placeholder="ما الذي تود معرفة المزيد عنه؟"
+                    value={formData.question}
+                    onChange={e => setFormData({...formData, question: e.target.value})}
+                />
+            </div>
+        </div>
+
+        <button type="submit" className="w-full py-4 bg-legal-900 text-white text-xl font-bold rounded-2xl hover:bg-legal-800 hover:scale-[1.01] transition-all shadow-lg flex items-center justify-center gap-3">
+            تسليم البطاقة <ArrowRight className="rotate-180" />
+        </button>
+      </form>
+
+      <div className="mt-8 text-center">
+        <button onClick={() => setView('teacherAuth')} className="text-xs text-legal-200 hover:text-legal-400 transition-colors">Admin Login</button>
+      </div>
+    </SectionCard>
+  );
+};
