@@ -411,15 +411,106 @@ export const ModernConnectSection: React.FC = () => (
   </SectionCard>
 );
 
-export const ReviewSection: React.FC = () => (
-  <div className="space-y-10 pb-12">
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-10 rounded-3xl shadow-xl text-center"><MessageCircle size={40} className="mx-auto mb-4"/><h2 className="text-4xl font-black">المراجعة والنقاش</h2></div>
-    <div className="grid lg:grid-cols-2 gap-8">
-      <SectionCard><h3 className="font-bold text-2xl mb-8 flex gap-2"><CheckCircle2 className="text-green-500"/> صواب أم خطأ؟</h3><div className="space-y-4">{REVIEW_CONTENT.trueFalse.map((item,i)=><div key={i} className="bg-legal-50 p-4 rounded-xl"><p className="font-bold mb-2">{item.statement}</p><div className="flex gap-2"><button className="flex-1 bg-white border py-2 rounded font-bold">صواب</button><button className="flex-1 bg-white border py-2 rounded font-bold">خطأ</button></div></div>)}</div></SectionCard>
-      <SectionCard><h3 className="font-bold text-2xl mb-8 flex gap-2"><Users2 className="text-blue-600"/> محاور النقاش</h3><div className="space-y-6">{REVIEW_CONTENT.topics.map((topic,i)=><div key={i} className="bg-legal-50 p-6 rounded-xl border-r-4 border-gold-500"><h4 className="font-black text-xl mb-4">{topic.title}</h4><ul className="space-y-2">{topic.points.map((p,pi)=><li key={pi} className="flex gap-2"><span className="text-gold-500">•</span>{p}</li>)}</ul></div>)}</div></SectionCard>
+export const ReviewSection: React.FC = () => {
+  const [revealedTF, setRevealedTF] = useState<number[]>([]);
+  const [revealedNotes, setRevealedNotes] = useState<number[]>([]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [pendingNoteIdx, setPendingNoteIdx] = useState<number | null>(null);
+
+  const toggleRevealTF = (idx: number) => {
+    if (!revealedTF.includes(idx)) setRevealedTF([...revealedTF, idx]);
+  };
+
+  const handleNoteClick = (idx: number) => {
+    if (revealedNotes.includes(idx)) return;
+    setPendingNoteIdx(idx);
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === 'omar2016') {
+      if (pendingNoteIdx !== null) setRevealedNotes([...revealedNotes, pendingNoteIdx]);
+      closeModal();
+    } else {
+      alert('كلمة المرور خاطئة');
+    }
+  };
+
+  const closeModal = () => {
+    setShowPasswordModal(false);
+    setPasswordInput('');
+    setPendingNoteIdx(null);
+  };
+
+  return (
+    <div className="space-y-10 pb-12">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-10 rounded-3xl shadow-xl text-center"><MessageCircle size={40} className="mx-auto mb-4"/><h2 className="text-4xl font-black">المراجعة والنقاش</h2></div>
+      <div className="grid lg:grid-cols-2 gap-8">
+        <SectionCard>
+          <h3 className="font-bold text-2xl mb-8 flex gap-2"><CheckCircle2 className="text-green-500"/> صواب أم خطأ؟</h3>
+          <div className="space-y-4">
+            {REVIEW_CONTENT.trueFalse.map((item, i) => {
+              const isRevealed = revealedTF.includes(i);
+              return (
+                <div key={i} className="bg-legal-50 p-4 rounded-xl">
+                  <p className="font-bold mb-4 text-lg text-legal-900">{item.statement}</p>
+                  {!isRevealed ? (
+                    <div className="flex gap-3">
+                      <button onClick={() => toggleRevealTF(i)} className="flex-1 bg-white border-2 border-legal-200 hover:border-green-500 hover:text-green-600 py-3 rounded-xl font-bold transition-all">صواب</button>
+                      <button onClick={() => toggleRevealTF(i)} className="flex-1 bg-white border-2 border-legal-200 hover:border-red-500 hover:text-red-600 py-3 rounded-xl font-bold transition-all">خطأ</button>
+                    </div>
+                  ) : (
+                    <div className={`p-4 rounded-xl animate-fade-in border ${item.isTrue ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                      <div className="flex items-center gap-2 font-bold mb-2 text-xl">{item.isTrue ? <Check size={24}/> : <X size={24}/>}{item.isTrue ? 'إجابة صحيحة' : 'إجابة خاطئة'}</div>
+                      <p className="font-medium">{item.correction}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+        <SectionCard>
+          <h3 className="font-bold text-2xl mb-8 flex gap-2"><Users2 className="text-blue-600"/> محاور النقاش</h3>
+          <div className="space-y-6">
+            {REVIEW_CONTENT.topics.map((topic, i) => {
+              const isRevealed = revealedNotes.includes(i);
+              return (
+                <div key={i} className="bg-legal-50 p-6 rounded-xl border-r-4 border-gold-500 shadow-sm">
+                  <h4 className="font-black text-xl mb-4 text-legal-900">{topic.title}</h4>
+                  <ul className="space-y-3 mb-4">{topic.points.map((p, pi) => <li key={pi} className="flex items-start gap-2 text-legal-700 font-medium"><span className="text-gold-500 mt-1.5">•</span>{p}</li>)}</ul>
+                  {topic.teacherNotes && (
+                    <div className="mt-6 pt-4 border-t border-legal-200">
+                      {!isRevealed ? (
+                        <button onClick={() => handleNoteClick(i)} className="flex items-center gap-2 text-sm font-bold text-legal-400 hover:text-gold-600 transition-colors"><Lock size={14} /> كشف التوجيه الأكاديمي (للأستاذ)</button>
+                      ) : (
+                        <div className="bg-white p-4 rounded-xl border border-gold-200 shadow-sm animate-fade-in"><h5 className="text-xs font-bold text-gold-600 mb-2 flex items-center gap-1 uppercase tracking-wider"><Lightbulb size={14} /> توجيه أكاديمي</h5><p className="text-legal-800 leading-relaxed whitespace-pre-line">{topic.teacherNotes}</p></div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+      </div>
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeModal}>
+          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all scale-100" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 bg-legal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-legal-900"><Lock size={24} /></div>
+            <h4 className="font-black text-xl text-center mb-6 text-legal-900">مصادقة الأستاذ</h4>
+            <form onSubmit={handlePasswordSubmit}>
+              <input type="password" autoFocus placeholder="الرمز السري" className="w-full text-center p-4 border-2 border-legal-100 rounded-xl mb-4 font-mono text-lg focus:border-gold-500 outline-none transition-colors" value={passwordInput} onChange={e => setPasswordInput(e.target.value)}/>
+              <div className="flex gap-3"><button type="submit" className="flex-1 bg-legal-900 text-white py-3 rounded-xl font-bold hover:bg-legal-800 transition-colors">فتح</button><button type="button" onClick={closeModal} className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">إلغاء</button></div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export const SummarySection: React.FC = () => (
   <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-legal-200 mb-12">
