@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
