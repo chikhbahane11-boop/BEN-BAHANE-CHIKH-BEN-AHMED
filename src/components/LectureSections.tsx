@@ -243,6 +243,7 @@ export const ComponentsSection: React.FC = () => {
 export const HistorySection: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const activeEvent = HISTORY_EVENTS[activeTab];
 
   const renderExtraInfo = (info: string) => {
@@ -264,11 +265,22 @@ export const HistorySection: React.FC = () => {
     return <div className="bg-blue-50 border border-blue-100 p-8 rounded-2xl mb-10"><GlossaryText text={info} /></div>;
   };
 
+  const handleTabChange = (idx: number) => {
+    setActiveTab(idx);
+    setShowQuiz(false);
+    setSelectedOption(null);
+  };
+
+  const closeQuiz = () => {
+    setShowQuiz(false);
+    setSelectedOption(null);
+  };
+
   return (
     <div className="flex flex-col h-full pb-12">
       <div className="flex justify-between max-w-3xl mx-auto mb-10 px-4">
           {HISTORY_EVENTS.map((event, idx) => (
-            <button key={idx} onClick={() => {setActiveTab(idx); setShowQuiz(false)}} className="group flex flex-col items-center">
+            <button key={idx} onClick={() => handleTabChange(idx)} className="group flex flex-col items-center">
               <div className={`w-14 h-14 rounded-full border-4 flex items-center justify-center text-xl shadow-sm transition-all ${activeTab === idx ? 'bg-legal-900 border-gold-500 text-white scale-110' : 'bg-white border-legal-200 text-legal-400'}`}>{event.icon}</div>
               <span className={`mt-3 text-sm font-bold ${activeTab === idx ? 'text-legal-900' : 'text-legal-400'}`}>{event.civilization}</span>
             </button>
@@ -288,7 +300,62 @@ export const HistorySection: React.FC = () => {
             {activeEvent.enrichment && <HandoutBox content={activeEvent.enrichment} />}
         </div>
         {!showQuiz && <div className="absolute bottom-8 left-8"><button onClick={() => setShowQuiz(true)} className="px-8 py-4 rounded-full shadow-glow font-bold bg-gold-500 text-white flex items-center gap-2 hover:scale-105 transition-transform"><HelpCircle/> ابدأ الاختبار</button></div>}
-        {showQuiz && <div className="absolute inset-0 flex items-center justify-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl"><div className="bg-white border shadow-2xl rounded-3xl p-10 max-w-2xl w-full relative"><button onClick={() => setShowQuiz(false)} className="absolute top-6 left-6"><XCircle/></button><h3 className="text-2xl font-black mb-8">{activeEvent.quiz.question}</h3><div className="space-y-4">{activeEvent.quiz.options.map((opt,i)=><button key={i} onClick={() => alert(i === activeEvent.quiz.correctIndex ? 'صحيح!' : 'خطأ')} className="w-full text-right p-5 rounded-xl border-2 font-bold hover:border-gold-400">{opt}</button>)}</div></div></div>}
+        
+        {showQuiz && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-white/90 backdrop-blur-sm rounded-2xl">
+            <div className="bg-white border shadow-2xl rounded-3xl p-10 max-w-2xl w-full relative animate-bounce-in">
+              <button onClick={closeQuiz} className="absolute top-6 left-6 text-legal-400 hover:text-legal-600 transition-colors"><XCircle size={28}/></button>
+              <h3 className="text-2xl font-black mb-8 text-legal-900 leading-relaxed">{activeEvent.quiz.question}</h3>
+              
+              <div className="space-y-4">
+                {activeEvent.quiz.options.map((opt, i) => {
+                  const isSelected = selectedOption === i;
+                  const isCorrect = i === activeEvent.quiz.correctIndex;
+                  const showResult = selectedOption !== null;
+                  
+                  let buttonStyle = "border-legal-200 hover:border-gold-400 hover:bg-legal-50 text-legal-700";
+                  let icon = null;
+
+                  if (showResult) {
+                    if (isCorrect) {
+                       buttonStyle = "bg-green-100 border-green-500 text-green-800 ring-2 ring-green-500 shadow-md scale-[1.02]";
+                       icon = <CheckCircle2 className="text-green-600" size={24} />;
+                    } else if (isSelected) {
+                       buttonStyle = "bg-red-100 border-red-500 text-red-800 ring-2 ring-red-500";
+                       icon = <XCircle className="text-red-600" size={24} />;
+                    } else {
+                       buttonStyle = "opacity-40 border-legal-100 bg-legal-50";
+                    }
+                  }
+
+                  return (
+                    <button 
+                      key={i} 
+                      onClick={() => !showResult && setSelectedOption(i)} 
+                      disabled={showResult}
+                      className={`w-full text-right p-5 rounded-xl border-2 font-bold transition-all duration-300 flex justify-between items-center text-lg ${buttonStyle}`}
+                    >
+                      <span>{opt}</span>
+                      {icon}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedOption !== null && (
+                <div className={`mt-8 p-6 rounded-2xl text-center font-bold animate-fade-in border-2 ${selectedOption === activeEvent.quiz.correctIndex ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                  <div className="text-2xl mb-2">
+                    {selectedOption === activeEvent.quiz.correctIndex ? '🎉 إجابة صحيحة! أحسنت.' : `❌ إجابة خاطئة.`}
+                  </div>
+                  {selectedOption !== activeEvent.quiz.correctIndex && (
+                      <div className="text-lg mb-2">الصواب هو: <span className="underline">{activeEvent.quiz.options[activeEvent.quiz.correctIndex]}</span></div>
+                  )}
+                  <p className="text-base font-medium mt-3 text-legal-600 leading-relaxed bg-white/50 p-3 rounded-xl inline-block">{activeEvent.quiz.explanation}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </SectionCard>
     </div>
   );
