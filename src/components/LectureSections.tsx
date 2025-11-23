@@ -4,7 +4,7 @@ import {
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
   HelpCircle, Play, XCircle, Trophy, Book, BookOpen, Lock, Unlock, Download,
   MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick,
-  ClipboardCheck, History, Users, Zap, Landmark, Printer, Trash2
+  ClipboardCheck, History, Users, Zap, Landmark, Printer, Trash2, ExternalLink
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, SOCIETY_COMPONENTS, HISTORY_EVENTS, SUBJECTS_DATA, 
@@ -12,7 +12,7 @@ import {
   SUMMARY_CARDS, COMPONENT_ENRICHMENT, INTRO_ENRICHMENT, 
   SUBJECTS_ENRICHMENT, MODERN_ENRICHMENT, REVIEW_CONTENT, INTRO_DEEP_DIVE, 
   COMPONENTS_DEEP_DIVE, SUBJECTS_DEEP_DIVE, MODERN_DEEP_DIVE, LEARNING_OBJECTIVES,
-  GOOGLE_FORM_URL
+  GOOGLE_FORM_URL, GOOGLE_FORM_RESPONSES_URL
 } from '../constants';
 import { LockedQuestion } from '../types';
 
@@ -400,7 +400,7 @@ export const SubjectsSection: React.FC = () => {
             <div className="animate-fade-in">
               <div className="flex justify-between text-legal-400 mb-8 text-sm font-mono px-4">
                 <span>السؤال {gameIndex + 1} من {CLASSIFICATION_GAME_ITEMS.length}</span>
-                <span>النقاط: {score}</span>
+                <span>النتيجة: {score}</span>
               </div>
               <h3 className="text-legal-300 mb-6 text-xl">ما هو التصنيف القانوني لهذا الكيان؟</h3>
               <h2 className="text-5xl font-black mb-12 text-white">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
@@ -672,6 +672,71 @@ export const SummarySection: React.FC = () => {
 };
 
 export const ExitTicket: React.FC = () => {
+  const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleTeacherLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'omar2016') {
+      setView('teacherView');
+      setError('');
+    } else {
+      setError('كلمة المرور غير صحيحة');
+    }
+  };
+
+  if (view === 'teacherAuth') {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
+        <Lock className="mx-auto text-legal-800 mb-4" size={48} />
+        <h2 className="text-xl font-bold mb-4">دخول الأستاذ</h2>
+        <form onSubmit={handleTeacherLogin}>
+          <input 
+            type="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="أدخل الرمز السري"
+            className="w-full p-3 border rounded-lg mb-4 text-center font-mono"
+            autoFocus
+          />
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          <div className="flex gap-2">
+            <button type="submit" className="flex-1 bg-legal-900 text-white py-2 rounded-lg">دخول</button>
+            <button type="button" onClick={() => setView('student')} className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg">عودة</button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  if (view === 'teacherView') {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-8 max-w-3xl mx-auto text-center">
+        <div className="flex justify-between items-center mb-8 border-b pb-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2"><Unlock className="text-green-500" /> ردود الطلاب</h2>
+          <button onClick={() => { setView('student'); setPassword(''); }} className="text-sm text-red-500 hover:underline">خروج</button>
+        </div>
+        
+        <div className="py-12 bg-legal-50 rounded-2xl border-2 border-dashed border-legal-200">
+          <ClipboardCheck size={64} className="mx-auto text-legal-300 mb-6" />
+          <h3 className="text-xl font-bold text-legal-800 mb-2">لمشاهدة الردود الحقيقية</h3>
+          <p className="text-legal-500 mb-8 max-w-md mx-auto">يتم تخزين ردود الطلاب مباشرة في نماذج جوجل (Google Forms). يرجى الانتقال إلى لوحة التحكم هناك لمشاهدتها.</p>
+          
+          <a 
+            href={GOOGLE_FORM_RESPONSES_URL} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-transform hover:scale-105"
+          >
+            <ExternalLink size={20} />
+            الذهاب إلى ردود جوجل (Google Sheets)
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <SectionCard className="max-w-4xl mx-auto border-t-8 border-legal-900">
       <div className="text-center mb-8">
@@ -683,9 +748,6 @@ export const ExitTicket: React.FC = () => {
       </div>
       
       <div className="relative w-full overflow-hidden bg-legal-50 rounded-xl border border-legal-200 min-h-[800px]">
-         <div className="absolute inset-0 flex items-center justify-center z-0">
-            <div className="animate-pulse text-legal-400">جاري تحميل الاستمارة...</div>
-         </div>
          <iframe 
            src={GOOGLE_FORM_URL} 
            width="100%" 
@@ -697,6 +759,12 @@ export const ExitTicket: React.FC = () => {
          >
            جاري التحميل...
          </iframe>
+      </div>
+      
+      <div className="mt-4 text-left">
+        <button onClick={() => setView('teacherAuth')} className="text-xs text-gray-400 hover:text-legal-600 font-bold px-4 py-2 rounded transition-colors">
+          دخول الأستاذ
+        </button>
       </div>
     </SectionCard>
   );
