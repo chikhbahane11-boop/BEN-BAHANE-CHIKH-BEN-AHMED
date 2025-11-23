@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
   HelpCircle, Play, XCircle, Trophy, Book, BookOpen, Lock, Unlock, Download,
   MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick,
-  ClipboardCheck, History, Users, Zap, Landmark, Printer
+  ClipboardCheck, History, Users, Zap, Landmark, Printer, Trash2
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, SOCIETY_COMPONENTS, HISTORY_EVENTS, SUBJECTS_DATA, 
@@ -676,11 +676,18 @@ export const ExitTicket: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({ name: '', learn: '', question: '' });
   
-  // Mock database for demonstration
-  const [allResponses, setAllResponses] = useState([
-    { name: 'طالب 1', learn: 'الفرق بين المجتمع الدولي والوطني', question: 'هل الفيتو قانوني؟' },
-    { name: 'طالب 2', learn: 'أهمية معاهدة وستفاليا', question: 'كيف نشأت الأمم المتحدة؟' }
-  ]);
+  // Local storage logic for persistence
+  const [allResponses, setAllResponses] = useState(() => {
+    const saved = localStorage.getItem('lecture_responses');
+    return saved ? JSON.parse(saved) : [
+      { name: 'طالب 1 (تجريبي)', learn: 'الفرق بين المجتمع الدولي والوطني', question: 'هل الفيتو قانوني؟' },
+      { name: 'طالب 2 (تجريبي)', learn: 'أهمية معاهدة وستفاليا', question: 'كيف نشأت الأمم المتحدة؟' }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lecture_responses', JSON.stringify(allResponses));
+  }, [allResponses]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -695,10 +702,16 @@ export const ExitTicket: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if(formData.learn && formData.question) {
-        setAllResponses([...allResponses, formData]);
+        setAllResponses(prev => [...prev, formData]);
         setSubmitted(true);
     }
   };
+
+  const clearData = () => {
+    if(confirm('هل أنت متأكد من مسح جميع ردود الطلاب؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      setAllResponses([]);
+    }
+  }
 
   if (view === 'teacherAuth') {
     return (
@@ -734,11 +747,14 @@ export const ExitTicket: React.FC = () => {
                 <Unlock className="text-green-500" />
                 ردود الطلاب ({allResponses.length})
             </h2>
-            <button onClick={() => { setView('student'); setPassword(''); }} className="text-red-500 font-bold text-sm hover:bg-red-50 px-4 py-2 rounded-lg transition-colors">تسجيل الخروج</button>
+            <div className="flex gap-2">
+               <button onClick={clearData} className="text-red-500 font-bold text-sm hover:bg-red-50 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"><Trash2 size={16}/> مسح البيانات</button>
+               <button onClick={() => { setView('student'); setPassword(''); }} className="text-legal-500 font-bold text-sm hover:bg-legal-50 px-4 py-2 rounded-lg transition-colors">تسجيل الخروج</button>
+            </div>
          </div>
          <div className="grid gap-4">
             {allResponses.length === 0 && <p className="text-center text-gray-400 py-8">لا توجد ردود بعد.</p>}
-            {allResponses.map((res, i) => (
+            {allResponses.map((res: any, i: number) => (
                 <div key={i} className="bg-legal-50 p-6 rounded-xl border border-legal-100 hover:border-gold-300 transition-colors">
                     <div className="flex justify-between mb-2">
                         <span className="font-bold text-legal-900">{res.name || 'مجهول'}</span>
