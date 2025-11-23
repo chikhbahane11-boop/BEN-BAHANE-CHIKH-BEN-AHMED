@@ -679,10 +679,8 @@ export const ExitTicket: React.FC = () => {
   // Local storage logic for persistence
   const [allResponses, setAllResponses] = useState(() => {
     const saved = localStorage.getItem('lecture_responses');
-    return saved ? JSON.parse(saved) : [
-      { name: 'طالب 1 (تجريبي)', learn: 'الفرق بين المجتمع الدولي والوطني', question: 'هل الفيتو قانوني؟' },
-      { name: 'طالب 2 (تجريبي)', learn: 'أهمية معاهدة وستفاليا', question: 'كيف نشأت الأمم المتحدة؟' }
-    ];
+    // Start empty, remove dummy data
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
