@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
@@ -26,7 +27,8 @@ import {
   Lightbulb,
   Target,
   FileText,
-  ClipboardCheck
+  ClipboardCheck,
+  ExternalLink
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, 
@@ -884,7 +886,6 @@ export const ExitTicket: React.FC = () => {
   const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
 
   const handleTeacherLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -944,45 +945,32 @@ export const ExitTicket: React.FC = () => {
     );
   }
 
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full bg-white rounded-2xl p-12 text-center shadow-sm">
-        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 size={40} />
-        </div>
-        <h2 className="text-2xl font-bold text-legal-900 mb-2">تم التسليم بنجاح!</h2>
-        <p className="text-legal-600">شكراً لمشاركتك. سيطلع الأستاذ على تعليقك لاحقاً.</p>
-        <button onClick={() => setSubmitted(false)} className="mt-8 text-sm text-legal-400 underline">إرسال رد آخر</button>
-        <div className="mt-12 pt-6 border-t w-full">
-          <button onClick={() => setView('teacherAuth')} className="text-xs text-gray-300 hover:text-gray-500">دخول الأستاذ</button>
-        </div>
-      </div>
-    );
-  }
-
+  // Student View: Direct Link Button instead of Iframe
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden border-t-8 border-legal-800 relative">
-      <div className="mb-6 text-center pt-8 px-8">
-        <h2 className="text-2xl font-bold text-legal-900">بطاقة الخروج</h2>
-        <p className="text-legal-500 mt-2">تذكر: لا تخرج قبل أن تترك أثراً!</p>
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-8 border-t-8 border-legal-800 relative text-center">
+      <div className="mb-8">
+        <div className="w-20 h-20 bg-legal-50 text-legal-900 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ClipboardCheck size={40} />
+        </div>
+        <h2 className="text-3xl font-bold text-legal-900">بطاقة الخروج</h2>
+        <p className="text-legal-500 mt-3 text-lg">شاركنا ما تعلمته اليوم واترك بصمتك!</p>
       </div>
       
-      <div className="w-full h-[600px] bg-gray-50">
-         <iframe 
-           src={GOOGLE_FORM_URL} 
-           width="100%" 
-           height="100%" 
-           frameBorder="0" 
-           marginHeight={0} 
-           marginWidth={0}
-           className="w-full h-full"
-         >
-           جاري التحميل...
-         </iframe>
+      <div className="py-8">
+        <a 
+            href={GOOGLE_FORM_URL} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full py-5 bg-legal-900 hover:bg-legal-800 text-white text-xl font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-3 hover:scale-105 transform duration-200"
+        >
+            <span>اضغط هنا لملء الاستمارة</span>
+            <ExternalLink size={24} />
+        </a>
+        <p className="text-sm text-legal-400 mt-4">سيفتح النموذج في نافذة جديدة</p>
       </div>
       
-      <div className="p-4 bg-gray-50 border-t text-left">
-        <button onClick={() => setView('teacherAuth')} className="text-[10px] text-gray-400 p-2 hover:text-legal-600 flex items-center gap-1">
+      <div className="mt-12 pt-6 border-t flex justify-center">
+        <button onClick={() => setView('teacherAuth')} className="text-xs text-gray-300 p-2 hover:text-legal-500 flex items-center gap-1 transition-colors">
            <Lock size={10} /> دخول الأستاذ
         </button>
       </div>
