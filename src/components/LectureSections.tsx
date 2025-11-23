@@ -1,41 +1,99 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
-  ArrowRight, CheckCircle2, Globe, Scale, ShieldCheck, Building2, Users2,
-  HelpCircle, Play, XCircle, Trophy, Book, BookOpen, Lock, Unlock, Download,
-  MessageCircle, BrainCircuit, Check, X, Lightbulb, Target, GraduationCap, MousePointerClick,
-  ClipboardCheck, History, Users, Zap, Landmark, Printer, Trash2, ExternalLink
+  ArrowRight, 
+  CheckCircle2, 
+  Globe, 
+  Scale, 
+  ShieldCheck, 
+  Building2, 
+  Users2,
+  Eye,
+  EyeOff,
+  MousePointerClick,
+  HelpCircle,
+  Play,
+  XCircle,
+  Trophy,
+  Book,
+  BookOpen,
+  Lock,
+  Unlock,
+  Download,
+  MessageCircle,
+  BrainCircuit,
+  Check,
+  X,
+  Lightbulb,
+  Target,
+  FileText,
+  ClipboardCheck
 } from 'lucide-react';
 import { 
-  NATIONAL_VS_INTL, SOCIETY_COMPONENTS, HISTORY_EVENTS, SUBJECTS_DATA, 
-  MODERN_EXAMPLES, CLASSIFICATION_GAME_ITEMS, INTRO_STORY, GLOSSARY, 
-  SUMMARY_CARDS, COMPONENT_ENRICHMENT, INTRO_ENRICHMENT, 
-  SUBJECTS_ENRICHMENT, MODERN_ENRICHMENT, REVIEW_CONTENT, INTRO_DEEP_DIVE, 
-  COMPONENTS_DEEP_DIVE, SUBJECTS_DEEP_DIVE, MODERN_DEEP_DIVE, LEARNING_OBJECTIVES,
-  GOOGLE_FORM_URL, GOOGLE_FORM_RESPONSES_URL
+  NATIONAL_VS_INTL, 
+  SOCIETY_COMPONENTS, 
+  HISTORY_EVENTS, 
+  SUBJECTS_DATA, 
+  MODERN_EXAMPLES, 
+  CLASSIFICATION_GAME_ITEMS,
+  INTRO_STORY,
+  GLOSSARY,
+  COMPONENT_ENRICHMENT,
+  INTRO_ENRICHMENT,
+  SUBJECTS_ENRICHMENT,
+  MODERN_ENRICHMENT,
+  REVIEW_CONTENT,
+  INTRO_DEEP_DIVE,
+  COMPONENTS_DEEP_DIVE,
+  SUBJECTS_DEEP_DIVE,
+  MODERN_DEEP_DIVE,
+  GOOGLE_FORM_URL,
+  GOOGLE_FORM_RESPONSES_URL,
+  SUMMARY_CARDS,
+  LEARNING_OBJECTIVES
 } from '../constants';
 import { LockedQuestion } from '../types';
 
-// --- Helper Components ---
-
+// --- Helper: Text with Glossary ---
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
+
   const terms = Object.keys(GLOSSARY);
   const regex = new RegExp(`(${terms.join('|')})`, 'g');
+  
   const parts = text.split(regex);
 
   return (
     <>
-      <span className="leading-loose text-legal-700 text-lg">
-        {parts.map((part, i) => GLOSSARY[part] ? (
-          <span key={i} onClick={(e) => { e.stopPropagation(); setActiveTerm(part); }} className="highlight-term font-bold text-legal-900 cursor-pointer border-b-2 border-gold-500 hover:bg-gold-100" title="تعريف">{part}</span>
-        ) : part)}
+      <span className="leading-relaxed text-legal-800 whitespace-pre-line">
+        {parts.map((part, i) => {
+          if (GLOSSARY[part]) {
+            return (
+              <span 
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setActiveTerm(part); }}
+                className="highlight-term px-1 rounded bg-yellow-50 text-legal-900 font-bold border-b-2 border-gold-500 cursor-pointer hover:bg-gold-100 transition-colors inline-block"
+                title="اضغط للتعريف"
+              >
+                {part}
+              </span>
+            );
+          }
+          return part;
+        })}
       </span>
+
+      {/* Glossary Modal */}
       {activeTerm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setActiveTerm(null)}>
-          <div className="bg-white rounded-2xl p-8 max-w-md animate-bounce-in border-b-8 border-gold-500 relative" onClick={e => e.stopPropagation()}>
-            <h3 className="text-2xl font-black text-legal-900 mb-4 text-center">{activeTerm}</h3>
-            <p className="text-legal-600 text-lg text-center">{GLOSSARY[activeTerm]}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setActiveTerm(null)}>
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full animate-fade-in border-t-4 border-gold-500" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-legal-900 flex items-center gap-2">
+                <Book size={20} className="text-gold-500" />
+                {activeTerm}
+              </h3>
+              <button onClick={() => setActiveTerm(null)}><XCircle className="text-legal-400 hover:text-red-500" /></button>
+            </div>
+            <p className="text-legal-600 text-lg leading-relaxed">{GLOSSARY[activeTerm]}</p>
           </div>
         </div>
       )}
@@ -43,326 +101,482 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-const SectionCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = "" }) => (
-  <div className={`bg-white rounded-2xl shadow-soft border border-white/50 p-6 md:p-8 ${className}`}>{children}</div>
-);
-
+// --- Helper: Handout Excerpt Box ---
 const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, source }) => (
-  <div className="my-10 group relative">
-    <div className="absolute inset-0 bg-legal-800 rounded-2xl rotate-1 opacity-5"></div>
-    <div className="relative bg-white border-r-4 border-legal-800 p-8 rounded-2xl shadow-lg">
-      <div className="flex items-start gap-4">
-        <div className="shrink-0 w-12 h-12 bg-legal-50 rounded-full flex items-center justify-center text-legal-800"><BookOpen size={24} /></div>
-        <div>
-          <h4 className="text-xs font-bold text-gold-600 uppercase tracking-wider mb-2">إثراء أكاديمي</h4>
-          <p className="text-legal-800 text-lg font-serif italic">"{content}"</p>
-          {source && <span className="block text-left text-xs text-legal-400 mt-3 font-bold">{source}</span>}
-        </div>
-      </div>
+  <div className="my-8 bg-legal-50 border-r-4 border-legal-400 p-6 rounded-lg shadow-inner relative overflow-hidden">
+    <div className="absolute top-0 left-0 opacity-5">
+      <Book size={100} />
     </div>
+    <h4 className="text-sm font-bold text-legal-500 mb-2 flex items-center gap-2">
+      <Book size={16} />
+      مقتطف من المرجع (لإثراء المعرفة)
+    </h4>
+    <p className="text-legal-800 italic font-medium relative z-10">"{content}"</p>
+    {source && <span className="block text-left text-xs text-legal-400 mt-2">{source}</span>}
   </div>
 );
 
+// --- Reusable Teacher Locked Panel ---
 const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[] }> = ({ title = "أسئلة التفكير العميق", questions }) => {
-  const [isLocked, setIsLocked] = useState(true);
+  // UNLOCKED BY DEFAULT
+  const [isLocked, setIsLocked] = useState(false); 
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordInput === 'omar2016') { setIsLocked(false); setShowPassword(false); } else { alert('خطأ في الرمز'); }
-  };
 
   return (
-    <div className="mt-10 bg-white border border-legal-200 rounded-2xl overflow-hidden shadow-soft">
-      <div className="bg-legal-50 p-4 border-b border-legal-100 flex justify-between items-center">
-        <h3 className="font-bold text-legal-800 flex items-center gap-3 text-lg"><BrainCircuit size={20} className="text-gold-600"/> {title}</h3>
-        <button onClick={() => isLocked ? setShowPassword(true) : setIsLocked(true)} className={`px-4 py-1 rounded-full text-xs font-bold flex items-center gap-2 ${isLocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-          {isLocked ? <Lock size={14} /> : <Unlock size={14} />} {isLocked ? 'مغلق' : 'مفتوح'}
+    <div className="mt-8 border border-legal-200 rounded-xl overflow-hidden shadow-sm bg-white">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-legal-50 to-white p-4 border-b border-legal-100 flex justify-between items-center">
+        <h3 className="font-bold text-legal-800 flex items-center gap-2">
+          <BrainCircuit className="text-gold-500" size={20} />
+          {title}
+        </h3>
+        <button 
+          onClick={() => setIsLocked(!isLocked)}
+          className={`text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1 transition-colors ${isLocked ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-600 hover:bg-green-200'}`}
+        >
+          {isLocked ? <Lock size={12} /> : <Unlock size={12} />}
+          {isLocked ? 'مغلق (للأستاذ)' : 'مفتوح للنقاش'}
         </button>
       </div>
-      <div className="p-8">
+
+      {/* Content */}
+      <div className="p-6 bg-white">
         {questions.map((q, i) => (
-          <div key={i} className="mb-8 last:mb-0">
-            <div className="flex items-start gap-4 mb-4">
-              <span className={`shrink-0 px-3 py-1 rounded-lg text-[11px] font-bold text-white ${q.type === 'critical' ? 'bg-purple-600' : 'bg-blue-600'}`}>{q.type === 'critical' ? 'تحليل' : 'فهم'}</span>
-              <h4 className="font-bold text-legal-900 text-xl">{q.question}</h4>
+          <div key={i} className="mb-6 last:mb-0">
+            <div className="flex items-start gap-3 mb-3">
+              <span className={`shrink-0 px-2 py-1 rounded text-[10px] font-bold text-white uppercase tracking-wider ${q.type === 'critical' ? 'bg-purple-500' : 'bg-blue-500'}`}>
+                {q.type === 'critical' ? 'تحليل' : 'فهم'}
+              </span>
+              <h4 className="font-bold text-legal-900 text-lg leading-snug">{q.question}</h4>
             </div>
-            <div className="relative pr-6 border-r-2 border-legal-200">
-              <div className={isLocked ? 'blur-md opacity-30 select-none' : ''}>
-                <div className="bg-legal-50 p-5 rounded-xl"><p className="text-legal-700 text-lg">{q.modelAnswer}</p></div>
+            
+            <div className="relative mr-2 pr-4 border-r-2 border-legal-200">
+              <div className={`transition-all duration-700 ${isLocked ? 'blur-md select-none opacity-40' : 'blur-0 opacity-100'}`}>
+                <p className="text-legal-600 leading-relaxed bg-legal-50 p-3 rounded-lg">
+                  <span className="font-bold text-gold-600 ml-2">الإجابة:</span>
+                  {q.modelAnswer}
+                </p>
               </div>
+              
               {isLocked && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <button onClick={() => setShowPassword(true)} className="bg-white shadow-lg border px-6 py-2 rounded-full text-sm font-bold flex items-center gap-2"><Lock size={14} /> كشف الإجابة</button>
+                  <button onClick={() => setIsLocked(false)} className="bg-white shadow-md border border-legal-200 text-legal-500 px-4 py-2 rounded-full text-sm font-bold hover:text-gold-600 hover:border-gold-400 transition-all flex items-center gap-2">
+                    <Lock size={14} />
+                    كشف الإجابة النموذجية
+                  </button>
                 </div>
               )}
             </div>
           </div>
         ))}
       </div>
-      {showPassword && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowPassword(false)}>
-          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm" onClick={e => e.stopPropagation()}>
-            <h4 className="font-bold text-xl text-center mb-4">صلاحية الأستاذ</h4>
-            <form onSubmit={handleUnlock}>
-              <input type="password" autoFocus className="w-full text-center p-3 border rounded-xl mb-4" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="الرمز السري" />
-              <button type="submit" className="w-full bg-legal-900 text-white py-3 rounded-xl font-bold">تأكيد</button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-// --- SECTIONS ---
-
+// --- Introduction Section (Story & Warm-up) ---
 export const IntroSection: React.FC = () => {
   const [showStoryReveal, setShowStoryReveal] = useState(false);
+  const [warmUpWord, setWarmUpWord] = useState('');
   const [revealedRows, setRevealedRows] = useState<number[]>([]);
 
+  const toggleRow = (idx: number) => {
+    if (revealedRows.includes(idx)) return;
+    setRevealedRows([...revealedRows, idx]);
+  };
+
   return (
-    <div className="space-y-10 pb-12 animate-fade-in">
-      {/* LEARNING OBJECTIVES - TOP */}
-      <div className="bg-white rounded-2xl p-8 shadow-soft border-l-[6px] border-gold-500 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-32 h-32 bg-gold-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
-        <h3 className="relative font-black text-2xl text-legal-900 mb-6 flex items-center gap-3">
-          <div className="p-2 bg-gold-100 text-gold-600 rounded-lg"><Target size={28} /></div> الأهداف التعليمية المحورية
-        </h3>
-        <div className="grid gap-4 relative z-10">
-          {LEARNING_OBJECTIVES.map((obj, i) => (
-            <div key={i} className="flex items-center gap-4 p-4 bg-legal-50 rounded-xl hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-gold-200">
-              <div className="w-10 h-10 rounded-full bg-legal-200 text-legal-600 flex items-center justify-center font-bold text-lg">{i + 1}</div>
-              <p className="text-legal-700 font-bold text-lg">{obj}</p>
-            </div>
-          ))}
+    <div className="space-y-12 animate-fade-in">
+
+      {/* Learning Objectives */}
+      <div className="bg-white rounded-2xl shadow-sm border-l-8 border-gold-500 p-6 flex flex-col md:flex-row items-center gap-6">
+        <div className="bg-gold-50 p-4 rounded-full text-gold-600 shrink-0">
+          <Target size={32} />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-legal-900 mb-3">الأهداف التعليمية المحورية:</h3>
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {LEARNING_OBJECTIVES.map((obj, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-legal-700">
+                <CheckCircle2 size={16} className="text-green-500 mt-1 shrink-0" />
+                <span>{obj}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-
-      {/* Warm Up */}
-      <div className="bg-gradient-to-br from-legal-900 via-legal-800 to-legal-900 text-white p-10 rounded-3xl shadow-xl text-center relative overflow-hidden">
+      
+      {/* Mental Warm-up */}
+      <div className="bg-gradient-to-br from-legal-900 to-legal-800 text-white p-8 rounded-2xl shadow-xl relative overflow-hidden">
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 border border-white/20 text-gold-300 text-sm font-bold mb-6"><BrainCircuit size={16} /> عصف ذهني</div>
-          <h2 className="text-3xl font-bold mb-6">عندما تسمع كلمة "<span className="text-gold-400 underline">المجتمع الدولي</span>" ما أول كلمة تخطر ببالك؟</h2>
-          <input type="text" placeholder="اكتب كلمتك هنا..." className="w-full max-w-lg mx-auto block px-6 py-4 rounded-2xl text-legal-900 text-lg font-bold outline-none shadow-lg" />
+          <h2 className="text-2xl font-bold mb-4 text-gold-400">🧠 التهيئة الذهنية</h2>
+          <p className="mb-4 text-lg">عندما تسمع كلمة "<span className="font-bold text-gold-200">المجتمع الدولي</span>"، ما هي أول كلمة تخطر ببالك؟</p>
+          <div className="flex gap-4 max-w-md">
+            <input 
+              type="text" 
+              value={warmUpWord}
+              onChange={(e) => setWarmUpWord(e.target.value)}
+              placeholder="اكتب كلمتك هنا... (مثلاً: الأمم المتحدة، فوضى، تعاون)"
+              className="flex-1 px-4 py-2 rounded-lg text-legal-900 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            />
+          </div>
+          {warmUpWord && <p className="mt-4 text-gold-200 animate-fade-in">كلمة مثيرة! هل يعبر "{warmUpWord}" عن واقع مجتمعنا الدولي اليوم؟ لنكتشف معاً.</p>}
         </div>
       </div>
 
-      {/* Story */}
-      <SectionCard className="!p-0 overflow-hidden">
-        <div className="bg-blue-50 p-6 flex items-center gap-3 border-b border-blue-100"><Globe size={24} className="text-blue-600"/> <h3 className="text-xl font-bold text-blue-900">{INTRO_STORY.title}</h3></div>
-        <div className="p-8">
-          <div className="text-lg text-legal-600 mb-8"><GlossaryText text={INTRO_STORY.scenario} /></div>
-          <div className="grid md:grid-cols-2 gap-8">
-             <div className="bg-legal-50 p-6 rounded-2xl"><h4 className="font-bold text-legal-800 mb-4 flex items-center gap-2"><HelpCircle className="text-gold-500"/> تساؤلات:</h4><ul className="space-y-2">{INTRO_STORY.questions.map((q,i)=><li key={i} className="text-legal-600 flex gap-2"><span className="text-gold-500">•</span>{q}</li>)}</ul></div>
-             <div>
-               {!showStoryReveal ? (
-                 <button onClick={() => setShowStoryReveal(true)} className="w-full py-6 bg-white border-2 border-gold-400 text-gold-700 font-bold rounded-2xl hover:bg-gold-50 transition-all flex flex-col items-center justify-center gap-2"><Lightbulb size={24}/> كشف التحليل</button>
-               ) : (
-                 <div className="bg-green-50 border-green-100 p-6 rounded-2xl border"><h4 className="font-bold text-green-800 mb-2 flex gap-2"><CheckCircle2/> التحليل:</h4><GlossaryText text={INTRO_STORY.answer} /></div>
-               )}
-             </div>
-          </div>
+      {/* Story Section */}
+      <div className="bg-white rounded-2xl shadow-sm border border-legal-200 overflow-hidden">
+        <div className="bg-blue-50 p-6 border-b border-blue-100">
+          <h3 className="text-xl font-bold text-blue-900 flex items-center gap-2">
+            <Globe className="text-blue-600" />
+            {INTRO_STORY.title}
+          </h3>
         </div>
-      </SectionCard>
+        <div className="p-8">
+          <GlossaryText text={INTRO_STORY.scenario} />
+          
+          <div className="my-6 bg-legal-50 p-4 rounded-xl">
+            <p className="font-bold text-legal-700 mb-3">❓ تساؤلات للنقاش:</p>
+            <ul className="list-disc list-inside space-y-2 text-legal-600">
+              {INTRO_STORY.questions.map((q, i) => <li key={i}>{q}</li>)}
+            </ul>
+          </div>
+
+          {!showStoryReveal ? (
+            <button 
+              onClick={() => setShowStoryReveal(true)}
+              className="w-full py-4 bg-gold-500 hover:bg-gold-600 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <HelpCircle size={20} />
+              تحليل اللغز (الربط بالواقع)
+            </button>
+          ) : (
+            <div className="bg-green-50 border border-green-200 p-6 rounded-xl animate-fade-in">
+              <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                <CheckCircle2 size={20} />
+                التحليل:
+              </h4>
+              <GlossaryText text={INTRO_STORY.answer} />
+            </div>
+          )}
+        </div>
+      </div>
 
       <HandoutBox content={INTRO_ENRICHMENT.content} source={INTRO_ENRICHMENT.sourcePage} />
-      
-      {/* Table */}
+
+      {/* Comparison Table */}
       <div>
-        <div className="flex justify-between mb-4 px-2"><h3 className="text-2xl font-bold text-legal-900 flex gap-3"><Scale className="text-gold-600"/> مقارنة جوهرية</h3><button onClick={() => setRevealedRows(NATIONAL_VS_INTL.map((_, i) => i))} className="text-gold-600 font-bold hover:bg-gold-50 px-3 py-1 rounded">كشف الكل</button></div>
-        <div className="bg-white rounded-2xl border border-legal-200 shadow-soft overflow-hidden">
-          <div className="grid grid-cols-12 bg-legal-50 border-b font-bold text-legal-700"><div className="col-span-3 p-5">المعيار</div><div className="col-span-5 p-5 border-r">الوطني</div><div className="col-span-4 p-5 border-r text-blue-800">الدولي</div></div>
-          {NATIONAL_VS_INTL.map((row, idx) => (
-            <div key={idx} className="grid grid-cols-12 border-b last:border-0 hover:bg-legal-50 cursor-pointer min-h-[80px]" onClick={() => setRevealedRows(prev => prev.includes(idx) ? prev : [...prev, idx])}>
-              <div className="col-span-3 p-5 font-bold text-legal-500">{row.criteria}</div>
-              <div className="col-span-5 p-5 border-r"><GlossaryText text={row.national} /></div>
-              <div className="col-span-4 p-5 border-r relative">
-                <div className={revealedRows.includes(idx) ? '' : 'opacity-0'}><GlossaryText text={row.international} /></div>
-                {!revealedRows.includes(idx) && <div className="absolute inset-0 flex items-center justify-center text-xs text-legal-400 font-bold"><MousePointerClick size={14}/> اضغط للكشف</div>}
-              </div>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-legal-800 flex items-center gap-2">
+            <Scale className="text-gold-600" />
+            مقارنة جوهرية: مجتمع الدولة vs المجتمع الدولي
+          </h3>
+          <button 
+            onClick={() => setRevealedRows(NATIONAL_VS_INTL.map((_, i) => i))}
+            className="text-sm text-gold-600 font-bold hover:underline"
+          >
+             كشف الكل
+          </button>
+        </div>
+        
+        <div className="overflow-hidden rounded-xl border border-legal-200 shadow-sm">
+          <table className="w-full text-right">
+            <thead className="bg-legal-50">
+              <tr>
+                <th className="p-4 text-legal-700 font-bold w-1/4">المعيار</th>
+                <th className="p-4 text-legal-900 font-bold bg-white/50 w-1/3">المجتمع الداخلي (الوطني)</th>
+                <th className="p-4 text-legal-900 font-bold text-blue-900 bg-blue-50/50">المجتمع الدولي (اضغط للكشف)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-legal-100 bg-white">
+              {NATIONAL_VS_INTL.map((row, idx) => {
+                const isRevealed = revealedRows.includes(idx);
+                return (
+                  <tr 
+                    key={idx} 
+                    className="hover:bg-legal-50 transition-colors cursor-pointer group"
+                    onClick={() => toggleRow(idx)}
+                  >
+                    <td className="p-4 font-semibold text-legal-500">{row.criteria}</td>
+                    <td className="p-4 text-legal-700"><GlossaryText text={row.national} /></td>
+                    <td className="p-4 relative">
+                      <div className={`transition-all duration-500 ${isRevealed ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'}`}>
+                        <GlossaryText text={row.international} />
+                      </div>
+                      {!isRevealed && <div className="absolute inset-0 flex items-center justify-center text-legal-400 text-sm">اضغط للكشف</div>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* Teacher Locked Panel for Intro */}
       <TeacherLockedPanel questions={INTRO_DEEP_DIVE} />
     </div>
   );
 };
 
+// --- Components Section ---
 export const ComponentsSection: React.FC = () => {
   const [activeCard, setActiveCard] = useState<number | null>(null);
 
   return (
-    <div className="space-y-10 pb-12">
-      <div className="bg-white p-8 rounded-2xl shadow-soft border-r-8 border-gold-500 flex items-center gap-6">
-          <Building2 size={40} className="text-gold-500 hidden md:block" />
-          <div><h3 className="text-xl font-bold text-legal-900 mb-2">الأركان الأربعة</h3><p className="text-legal-600 text-lg">غياب أحد هذه الأركان يعني انتفاء صفة المجتمع الدولي.</p></div>
+    <div className="space-y-8">
+       <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gold-500 mb-6">
+        <p className="text-legal-700 text-lg font-medium">
+          لإطلاق مصطلح "مجتمع دولي" على أي تجمع، يجب توفر 4 أركان (مقومات) لا غنى عنها. غياب أحدها يعني انتفاء صفة المجتمع الدولي.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {SOCIETY_COMPONENTS.map((comp, idx) => {
           const isActive = activeCard === idx;
           return (
             <div 
               key={idx} 
               onClick={() => setActiveCard(isActive ? null : idx)}
-              className={`relative p-8 rounded-3xl shadow-soft cursor-pointer transition-all duration-500 border overflow-hidden flex flex-col ${isActive ? 'bg-legal-900 text-white shadow-2xl scale-105 z-10' : 'bg-white hover:border-gold-300 hover:shadow-xl'}`}
+              className={`
+                relative p-6 rounded-xl shadow-sm cursor-pointer transition-all duration-500 border overflow-hidden group
+                ${isActive 
+                  ? 'bg-legal-900 text-white border-legal-900 row-span-2 shadow-xl transform scale-[1.02]' 
+                  : 'bg-white text-legal-800 border-transparent hover:border-gold-500 hover:shadow-md'
+                }
+              `}
             >
-              <div className="flex justify-between mb-6"><h3 className={`text-2xl font-black ${isActive ? 'text-gold-400' : 'text-legal-900'}`}>{comp.title}</h3><span className="text-4xl font-black opacity-10">0{idx+1}</span></div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-xl font-bold transition-colors ${isActive ? 'text-gold-400' : 'text-legal-800'}`}>
+                  {comp.title}
+                </h3>
+                <span className="text-xs font-mono opacity-50">0{idx + 1}</span>
+              </div>
               
-              {/* HIDE DESCRIPTION WHEN ACTIVE */}
+              {/* Hide Description when Active, Show when Inactive */}
               {!isActive && (
-                 <div className="mb-6 leading-relaxed text-lg text-legal-600 line-clamp-3 flex-1"><GlossaryText text={comp.description} /></div>
-              )}
-              
-              {/* SHOW EXAMPLES WHEN ACTIVE */}
-              {isActive && (
-                <div className="animate-fade-in pt-4">
-                  <div className="mb-6 p-6 bg-legal-800 rounded-2xl border border-legal-700">
-                    <p className="text-sm font-bold text-gold-400 mb-4 flex gap-2 uppercase"><CheckCircle2 size={16}/> أمثلة تطبيقية</p>
-                    <div className="flex flex-wrap gap-3">{comp.examples.map((ex, i) => <span key={i} className="bg-white/10 px-4 py-2 rounded-lg text-gray-100 border border-white/10">{ex}</span>)}</div>
-                  </div>
-                  <div className="flex gap-4 text-gold-100 font-medium bg-gradient-to-br from-gold-600 to-gold-700 p-6 rounded-2xl shadow-lg">
-                    <Globe size={24} className="shrink-0 mt-1 text-gold-200" />
-                    <span><strong className="text-white block mb-1">مثال واقعي:</strong> {comp.realWorld}</span>
-                  </div>
+                <div className="mb-4 leading-relaxed text-sm md:text-base text-legal-600 line-clamp-3">
+                   <GlossaryText text={comp.description} />
                 </div>
               )}
-
-              {!isActive && <div className="mt-auto pt-6 border-t border-legal-50 flex justify-between items-center text-xs font-bold text-legal-400 group-hover:text-gold-600"><span>اضغط للتفاصيل</span><ArrowRight size={16} className="rotate-180"/></div>}
+              
+              <div className={`transition-all duration-500 overflow-hidden ${isActive ? 'max-h-[500px] opacity-100 pt-2' : 'max-h-0 opacity-0'}`}>
+                <div className="mb-4">
+                  <p className="text-sm font-bold text-gold-400 mb-2">أمثلة تطبيقية:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {comp.examples.map((ex, i) => (
+                      <span key={i} className="text-xs bg-legal-700 px-2 py-1 rounded text-gray-200 border border-legal-600">{ex}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gold-400 font-medium bg-legal-800 p-3 rounded-lg">
+                  <Globe size={16} />
+                  <span>مثال واقعي: {comp.realWorld}</span>
+                </div>
+              </div>
+              {!isActive && (
+                <div className="mt-4 text-xs text-gold-600 font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  انقر لقراءة الشرح التفصيلي <ArrowRight size={12} className="rotate-180" />
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
       <HandoutBox content={COMPONENT_ENRICHMENT.content} source={COMPONENT_ENRICHMENT.sourcePage} />
       <TeacherLockedPanel questions={COMPONENTS_DEEP_DIVE} />
     </div>
   );
 };
 
+// --- History Section ---
 export const HistorySection: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const activeEvent = HISTORY_EVENTS[activeTab];
+  const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  
+  // UNLOCKED BY DEFAULT
+  const [isQuizLocked, setIsQuizLocked] = useState(false); 
 
-  const renderExtraInfo = (info: string) => {
-    if (info.includes('|||')) {
-      const parts = info.split('|||');
-      return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          {parts.map((part, idx) => (
-            <div key={idx} className={`p-6 rounded-2xl border-2 relative ${idx === 0 ? 'bg-blue-50 border-blue-200' : 'bg-amber-50 border-amber-200'}`}>
-              <div className={`absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-bold shadow-sm ${idx === 0 ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>
-                 {idx === 0 ? 'المحطة الأولى (سومر)' : 'المحطة الثانية (مصر والحيثيين)'}
-              </div>
-              <div className="mt-2"><GlossaryText text={part.trim()} /></div>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return <div className="bg-blue-50 border border-blue-100 p-8 rounded-2xl mb-10"><GlossaryText text={info} /></div>;
-  };
+  const activeEvent = HISTORY_EVENTS[activeTab];
 
   const handleTabChange = (idx: number) => {
     setActiveTab(idx);
     setShowQuiz(false);
     setSelectedOption(null);
+    setQuizFeedback(null);
   };
 
-  const closeQuiz = () => {
-    setShowQuiz(false);
-    setSelectedOption(null);
+  const handleQuizAnswer = (optIdx: number) => {
+    if (quizFeedback) return;
+    setSelectedOption(optIdx);
+    setQuizFeedback(optIdx === activeEvent.quiz.correctIndex ? 'correct' : 'incorrect');
+  };
+
+  const renderExtraInfo = (text?: string) => {
+    if (!text) return null;
+    
+    // Check for separator
+    const hasSeparator = text.includes('|||');
+    
+    if (hasSeparator) {
+        const parts = text.split('|||');
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-xl flex flex-col h-full">
+                    <GlossaryText text={parts[0]} />
+                </div>
+                <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-xl flex flex-col h-full">
+                    <GlossaryText text={parts[1]} />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-xl mb-8">
+             <h4 className="font-bold text-blue-900 mb-3 flex items-center gap-2"><BookOpen size={18}/> تفاصيل المحطة التاريخية</h4>
+             <GlossaryText text={text} />
+        </div>
+    );
   };
 
   return (
-    <div className="flex flex-col h-full pb-12">
-      <div className="flex justify-between max-w-3xl mx-auto mb-10 px-4">
-          {HISTORY_EVENTS.map((event, idx) => (
-            <button key={idx} onClick={() => handleTabChange(idx)} className="group flex flex-col items-center">
-              <div className={`w-14 h-14 rounded-full border-4 flex items-center justify-center text-xl shadow-sm transition-all ${activeTab === idx ? 'bg-legal-900 border-gold-500 text-white scale-110' : 'bg-white border-legal-200 text-legal-400'}`}>{event.icon}</div>
-              <span className={`mt-3 text-sm font-bold ${activeTab === idx ? 'text-legal-900' : 'text-legal-400'}`}>{event.civilization}</span>
-            </button>
-          ))}
+    <div className="flex flex-col min-h-full pb-20">
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide shrink-0">
+        {HISTORY_EVENTS.map((event, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleTabChange(idx)}
+            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === idx
+                ? 'bg-legal-800 text-white shadow-lg scale-105'
+                : 'bg-white text-legal-500 hover:bg-legal-50 border border-legal-200'
+            }`}
+          >
+            <span>{event.icon}</span>
+            {event.civilization}
+          </button>
+        ))}
       </div>
 
-      <SectionCard className="flex-1 relative">
-        <div className={showQuiz ? 'blur-sm opacity-40 pointer-events-none' : ''}>
-            <div className="mb-8 border-b pb-6"><span className="px-3 py-1 rounded-full bg-gold-100 text-gold-700 font-bold text-xs">{activeEvent.period}</span><h2 className="text-4xl font-black text-legal-900 mt-2">{activeEvent.treatyName}</h2></div>
-            <div className="grid md:grid-cols-3 gap-6 mb-10">
-               {Object.entries(activeEvent.details).map(([key, val], i) => key !== 'extraInfo' && (
-                   <div key={i} className="bg-legal-50 rounded-xl p-5 border border-legal-100"><span className="text-xs text-legal-400 font-bold block mb-2 uppercase">{key}</span><p className="text-base font-bold text-legal-800"><GlossaryText text={val} /></p></div>
-               ))}
-            </div>
-            {activeEvent.details.extraInfo && renderExtraInfo(activeEvent.details.extraInfo)}
-            <div className="bg-legal-900 text-white rounded-2xl p-8 shadow-xl mb-8"><h4 className="font-bold text-gold-400 mb-6 text-xl flex gap-2"><Trophy/> أهم المبادئ</h4><div className="grid md:grid-cols-2 gap-4">{activeEvent.achievements.map((ach,i)=><div key={i} className="flex gap-3"><span className="w-2 h-2 bg-gold-500 rounded-full mt-2.5"></span><span className="text-legal-100">{ach}</span></div>)}</div></div>
-            {activeEvent.enrichment && <HandoutBox content={activeEvent.enrichment} />}
-        </div>
-        {!showQuiz && <div className="absolute bottom-8 left-8"><button onClick={() => setShowQuiz(true)} className="px-8 py-4 rounded-full shadow-glow font-bold bg-gold-500 text-white flex items-center gap-2 hover:scale-105 transition-transform"><HelpCircle/> ابدأ الاختبار</button></div>}
-        
-        {showQuiz && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-white/90 backdrop-blur-sm rounded-2xl">
-            <div className="bg-white border shadow-2xl rounded-3xl p-10 max-w-2xl w-full relative animate-bounce-in">
-              <button onClick={closeQuiz} className="absolute top-6 left-6 text-legal-400 hover:text-legal-600 transition-colors"><XCircle size={28}/></button>
-              <h3 className="text-2xl font-black mb-8 text-legal-900 leading-relaxed">{activeEvent.quiz.question}</h3>
-              
-              <div className="space-y-4">
-                {activeEvent.quiz.options.map((opt, i) => {
-                  const isSelected = selectedOption === i;
-                  const isCorrect = i === activeEvent.quiz.correctIndex;
-                  const showResult = selectedOption !== null;
-                  
-                  let buttonStyle = "border-legal-200 hover:border-gold-400 hover:bg-legal-50 text-legal-700";
-                  let icon = null;
-
-                  if (showResult) {
-                    if (isCorrect) {
-                       buttonStyle = "bg-green-100 border-green-500 text-green-800 ring-2 ring-green-500 shadow-md scale-[1.02]";
-                       icon = <CheckCircle2 className="text-green-600" size={24} />;
-                    } else if (isSelected) {
-                       buttonStyle = "bg-red-100 border-red-500 text-red-800 ring-2 ring-red-500";
-                       icon = <XCircle className="text-red-600" size={24} />;
-                    } else {
-                       buttonStyle = "opacity-40 border-legal-100 bg-legal-50";
-                    }
-                  }
-
-                  return (
-                    <button 
-                      key={i} 
-                      onClick={() => !showResult && setSelectedOption(i)} 
-                      disabled={showResult}
-                      className={`w-full text-right p-5 rounded-xl border-2 font-bold transition-all duration-300 flex justify-between items-center text-lg ${buttonStyle}`}
-                    >
-                      <span>{opt}</span>
-                      {icon}
-                    </button>
-                  );
-                })}
+      <div className="bg-white rounded-2xl shadow-sm border border-legal-200 overflow-hidden flex-1 flex flex-col relative transition-all duration-300">
+        <div className={`p-8 flex-1 overflow-y-auto ${showQuiz ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <span className="text-gold-600 font-bold tracking-wider text-sm uppercase">{activeEvent.period}</span>
+                <h2 className="text-3xl font-bold text-legal-900 mt-1">{activeEvent.treatyName}</h2>
               </div>
-
-              {selectedOption !== null && (
-                <div className={`mt-8 p-6 rounded-2xl text-center font-bold animate-fade-in border-2 ${selectedOption === activeEvent.quiz.correctIndex ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                  <div className="text-2xl mb-2">
-                    {selectedOption === activeEvent.quiz.correctIndex ? '🎉 إجابة صحيحة! أحسنت.' : `❌ إجابة خاطئة.`}
-                  </div>
-                  {selectedOption !== activeEvent.quiz.correctIndex && (
-                      <div className="text-lg mb-2">الصواب هو: <span className="underline">{activeEvent.quiz.options[activeEvent.quiz.correctIndex]}</span></div>
-                  )}
-                  <p className="text-base font-medium mt-3 text-legal-600 leading-relaxed bg-white/50 p-3 rounded-xl inline-block">{activeEvent.quiz.explanation}</p>
-                </div>
-              )}
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+               {Object.entries(activeEvent.details).map(([key, val], i) => {
+                 if (key === 'extraInfo') return null;
+                 return (
+                   <div key={i} className="bg-legal-50 p-4 rounded-lg border-r-2 border-legal-300">
+                     <span className="text-xs text-legal-500 font-bold block mb-1 uppercase">
+                       {key === 'parties' ? 'الأطراف' : key === 'topic' ? 'الموضوع' : 'الآلية/الحل'}
+                     </span>
+                     <p className="text-sm font-medium text-legal-800"><GlossaryText text={val} /></p>
+                   </div>
+                 );
+               })}
+            </div>
+
+            {/* Detailed Breakdown */}
+            {renderExtraInfo(activeEvent.details.extraInfo)}
+
+            {/* Milestones */}
+            <div className="bg-legal-900 text-white rounded-xl p-6 mb-8 shadow-lg">
+              <h4 className="font-bold text-gold-400 flex items-center gap-2 mb-4 text-lg">
+                <Trophy size={20} />
+                أهم المحطات والمبادئ المستخلصة
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activeEvent.achievements.map((ach, i) => (
+                  <div key={i} className="flex items-start gap-3 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-gold-500 mt-2 shrink-0" />
+                    <span className="text-sm font-medium leading-relaxed">{ach}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Replaced custom locked section with generic component if questions exist */}
+            {activeEvent.discussionQuestions && (
+               <TeacherLockedPanel title="مناقشة تاريخية معمقة" questions={activeEvent.discussionQuestions} />
+            )}
+
+            {activeEvent.enrichment && (
+              <HandoutBox content={activeEvent.enrichment} source="د. إسالمة محمد أمين - المطبوعة الجامعية" />
+            )}
+        </div>
+
+        {/* Quiz Start Button */}
+        {!showQuiz && (
+          <div className="absolute bottom-8 left-8 z-10">
+            <button 
+              onClick={() => isQuizLocked ? {} : setShowQuiz(true)}
+              className={`
+                px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 transition-all transform hover:scale-105
+                ${isQuizLocked 
+                  ? 'bg-gray-400 text-white opacity-90 cursor-not-allowed' 
+                  : 'bg-gold-500 hover:bg-gold-600 text-white animate-pulse'
+                }
+              `}
+            >
+              {isQuizLocked ? <Lock size={20} /> : <HelpCircle size={20} />}
+              {isQuizLocked ? 'اختبار المرحلة (مغلق)' : 'ابدأ الاختبار الآن'}
+            </button>
           </div>
         )}
-      </SectionCard>
+
+        {/* Quiz Modal */}
+        {showQuiz && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center p-4 animate-fade-in">
+             <div className="bg-white border border-legal-200 shadow-2xl rounded-2xl p-8 max-w-xl w-full relative max-h-[90vh] overflow-y-auto">
+                <button onClick={() => setShowQuiz(false)} className="absolute top-4 left-4 text-legal-400 hover:text-legal-600"><XCircle size={24} /></button>
+                <h3 className="text-xl font-bold text-legal-900 mb-6 pr-8">سؤال: {activeEvent.quiz.question}</h3>
+                <div className="space-y-3 mb-6">
+                  {activeEvent.quiz.options.map((option, i) => {
+                    const isSelected = selectedOption === i;
+                    const isCorrect = i === activeEvent.quiz.correctIndex;
+                    let btnClass = "w-full text-right p-4 rounded-xl border-2 font-medium transition-all ";
+                    
+                    if (selectedOption === null) btnClass += "border-legal-100 hover:border-gold-500 hover:bg-legal-50";
+                    else if (isCorrect) btnClass += "border-green-500 bg-green-50 text-green-800";
+                    else if (isSelected) btnClass += "border-red-500 bg-red-50 text-red-800 opacity-60";
+                    else btnClass += "border-legal-100 opacity-50";
+
+                    return (
+                      <button key={i} disabled={selectedOption !== null} onClick={() => handleQuizAnswer(i)} className={btnClass}>
+                        <div className="flex justify-between items-center">
+                          <span>{option}</span>
+                          {selectedOption !== null && isCorrect && <CheckCircle2 className="text-green-600" />}
+                          {isSelected && !isCorrect && <XCircle className="text-red-600" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {quizFeedback && (
+                  <div className={`p-4 rounded-lg text-sm ${quizFeedback === 'correct' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <span className="font-bold block mb-1">{quizFeedback === 'correct' ? 'إجابة صحيحة!' : 'خطأ!'}</span>
+                    {activeEvent.quiz.explanation}
+                  </div>
+                )}
+             </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
+// --- Subjects Section ---
 export const SubjectsSection: React.FC = () => {
   const [mode, setMode] = useState<'learn' | 'play'>('learn');
   const [score, setScore] = useState(0);
@@ -392,289 +606,285 @@ export const SubjectsSection: React.FC = () => {
     setMode('learn');
   };
 
-  if (mode === 'play') {
-    return (
-      <div className="space-y-10 pb-12">
-         <div className="bg-legal-900 rounded-3xl shadow-2xl p-8 max-w-4xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500 min-h-[500px] flex flex-col justify-center">
-          {!isFinished ? (
-            <div className="animate-fade-in">
-              <div className="flex justify-between text-legal-400 mb-8 text-sm font-mono px-4">
-                <span>السؤال {gameIndex + 1} من {CLASSIFICATION_GAME_ITEMS.length}</span>
-                <span>النتيجة: {score}</span>
-              </div>
-              <h3 className="text-legal-300 mb-6 text-xl">ما هو التصنيف القانوني لهذا الكيان؟</h3>
-              <h2 className="text-5xl font-black mb-12 text-white">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
-              
-              {lastFeedback ? (
-                <div className={`p-6 rounded-2xl text-2xl font-bold animate-bounce-in mx-auto max-w-xl ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                  {lastFeedback.msg}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                  <button onClick={() => handleGameChoice('state')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">دولة (شخص أصلي)</button>
-                  <button onClick={() => handleGameChoice('org')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">منظمة (شخص وظيفي)</button>
-                  <button onClick={() => handleGameChoice('special')} className="p-6 bg-legal-800 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-legal-700 hover:border-gold-400 shadow-lg">وضع خاص</button>
-                </div>
-              )}
+  if (mode === 'play') return (
+    <div className="bg-legal-900 rounded-2xl shadow-xl p-8 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500">
+      {!isFinished ? (
+        <>
+          <div className="flex justify-between text-legal-400 mb-8 text-sm font-mono">
+            <span>السؤال {gameIndex + 1}/{CLASSIFICATION_GAME_ITEMS.length}</span>
+            <span>النتيجة: {score}</span>
+          </div>
+          <h3 className="text-legal-300 mb-4">ما هو التصنيف القانوني لهذا الكيان؟</h3>
+          <h2 className="text-4xl font-black mb-12">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
+          
+          {lastFeedback ? (
+            <div className={`p-6 rounded-xl text-xl font-bold animate-bounce-in ${lastFeedback.correct ? 'bg-green-500' : 'bg-red-500'}`}>
+              {lastFeedback.msg}
             </div>
           ) : (
-            <div className="py-8 animate-fade-in">
-              <div className="w-24 h-24 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-6 text-legal-900 animate-bounce"><Trophy size={48} /></div>
-              <h2 className="text-4xl font-black mb-4">انتهت اللعبة!</h2>
-              <p className="text-2xl mb-10 text-legal-300">نتيجتك النهائية: <span className="text-gold-400 font-black">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
-              <button onClick={resetGame} className="bg-white text-legal-900 px-10 py-4 rounded-full font-bold text-xl hover:bg-gold-400 transition-all shadow-lg hover:scale-105">العودة للدرس</button>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <button onClick={() => handleGameChoice('state')} className="p-4 bg-legal-700 hover:bg-gold-500 rounded-xl font-bold transition-colors">دولة (شخص أصلي)</button>
+              <button onClick={() => handleGameChoice('org')} className="p-4 bg-legal-700 hover:bg-gold-500 rounded-xl font-bold transition-colors">منظمة (شخص وظيفي)</button>
+              <button onClick={() => handleGameChoice('special')} className="p-4 bg-legal-700 hover:bg-gold-500 rounded-xl font-bold transition-colors">وضع خاص</button>
             </div>
           )}
+        </>
+      ) : (
+        <div className="py-8 animate-fade-in">
+          <Trophy size={80} className="text-gold-400 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold mb-4">انتهت اللعبة!</h2>
+          <p className="text-xl mb-8">نتيجتك: {score} / {CLASSIFICATION_GAME_ITEMS.length}</p>
+          <button onClick={resetGame} className="bg-gold-500 text-legal-900 px-8 py-3 rounded-full font-bold hover:bg-white transition-colors">العودة للدرس</button>
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 
   return (
-    <div className="space-y-10 pb-12">
-       <div className="grid lg:grid-cols-3 gap-8">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {SUBJECTS_DATA.map((subj, idx) => (
-          <div key={idx} className="bg-white rounded-3xl shadow-soft p-8 border border-legal-100 hover:shadow-xl transition-all hover:-translate-y-2 group">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 transition-transform group-hover:scale-110 ${idx===0?'bg-blue-600':idx===1?'bg-purple-600':'bg-teal-600'}`}>{idx===0?<Building2 size={32}/>:idx===1?<Users2 size={32}/>:<ShieldCheck size={32}/>}</div>
-            <h3 className="text-2xl font-black text-legal-900 mb-3">{subj.type}</h3>
-            <p className="text-legal-600 mb-6 h-16 leading-relaxed"><GlossaryText text={subj.desc} /></p>
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-legal-50">{subj.elements.map((el,i)=><span key={i} className="text-xs font-bold bg-legal-50 px-3 py-1 rounded-full text-legal-600">{el}</span>)}</div>
+          <div key={idx} className="bg-white rounded-xl shadow-sm p-6 border-t-4 border-legal-600 hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-legal-50 w-12 h-12 rounded-full flex items-center justify-center text-legal-800 mb-4">
+              {idx === 0 ? <Building2 /> : idx === 1 ? <Users2 /> : <ShieldCheck />}
+            </div>
+            <h3 className="text-lg font-bold text-legal-900 mb-2"><GlossaryText text={subj.type} /></h3>
+            <p className="text-sm text-legal-600 mb-4 h-12"><GlossaryText text={subj.desc} /></p>
+            <div className="flex flex-wrap gap-2">
+              {subj.elements.map((el, i) => <span key={i} className="text-xs border border-legal-200 px-2 py-1 rounded bg-white text-legal-500">{el}</span>)}
+            </div>
           </div>
         ))}
-       </div>
-       <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
-       
-       <div className="bg-gradient-to-r from-legal-900 to-legal-800 rounded-3xl p-10 text-white flex flex-col md:flex-row justify-between items-center cursor-pointer shadow-2xl hover:shadow-gold-500/20 border border-legal-700 transition-all group" onClick={() => setMode('play')}>
-          <div className="mb-6 md:mb-0">
-            <h3 className="text-3xl font-black mb-2 flex items-center gap-3"><Trophy className="text-gold-500" size={32}/> لعبة الخبير الدولي</h3>
-            <p className="text-legal-300 text-lg">هل يمكنك تصنيف الكيانات الدولية بشكل صحيح؟</p>
-          </div>
-          <div className="bg-gold-500 text-legal-900 w-16 h-16 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg border-4 border-legal-800">
-            <Play size={32} fill="currentColor" className="ml-1"/>
-          </div>
-       </div>
-       
-       <TeacherLockedPanel questions={SUBJECTS_DEEP_DIVE} />
+      </div>
+      
+      <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
+      
+      <div className="bg-gradient-to-r from-gold-500 to-gold-600 rounded-2xl p-8 text-white flex items-center justify-between shadow-lg">
+        <div>
+          <h3 className="text-2xl font-bold mb-2">لعبة: خبير التصنيف الدولي</h3>
+          <p className="opacity-90">اختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي.</p>
+        </div>
+        <button onClick={() => setMode('play')} className="bg-white text-gold-600 px-8 py-3 rounded-full font-bold hover:bg-legal-100 transition-colors shadow-md flex gap-2">
+          <Play size={20} fill="currentColor" /> ابدأ التحدي
+        </button>
+      </div>
+
+      <TeacherLockedPanel questions={SUBJECTS_DEEP_DIVE} />
     </div>
   );
 };
 
+// --- Modern Section ---
 export const ModernConnectSection: React.FC = () => (
-  <SectionCard className="pb-12">
-    <h3 className="text-3xl font-black text-legal-900 mb-10 flex items-center gap-4 border-b pb-6"><Globe size={32} className="text-gold-500"/> ربط الماضي بالحاضر</h3>
-    <div className="space-y-4 mb-10">
+  <div className="bg-white rounded-xl shadow-sm p-8">
+    <h3 className="text-2xl font-bold text-legal-900 mb-6 flex items-center gap-2">
+      <Globe className="text-gold-500" />
+      ربط الماضي بالحاضر
+    </h3>
+    <div className="grid gap-4 mb-8">
       {MODERN_EXAMPLES.map((item, i) => (
-        <div key={i} className="flex flex-col md:flex-row items-center gap-6 p-6 bg-legal-50 rounded-2xl border border-legal-200 hover:bg-white hover:shadow-md transition-all group">
-          <div className="flex-1 text-center md:text-right">
-             <span className="block text-xs font-bold text-legal-400 mb-1 tracking-wider">{item.period}</span>
-             <span className="text-lg font-bold text-legal-600 group-hover:text-legal-900">{item.old}</span>
+        <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-4 bg-legal-50 rounded-lg border border-legal-100 hover:border-gold-400 transition-colors">
+          <div className="flex flex-col">
+             <span className="font-bold text-legal-500">{item.old}</span>
+             <span className="text-[10px] text-legal-400 font-medium">{item.period}</span>
           </div>
-          <ArrowRight className="text-legal-300 rotate-90 md:rotate-180" />
-          <div className="flex-1 text-center md:text-left"><span className="inline-block px-5 py-2 rounded-xl bg-white border border-legal-200 text-legal-900 font-bold shadow-sm group-hover:border-gold-400">{item.new}</span></div>
+          <ArrowRight className="text-legal-300 rotate-90 sm:rotate-180 my-2 sm:my-0" />
+          <span className="font-bold text-legal-900 bg-white px-4 py-1 rounded shadow-sm w-full sm:w-auto text-center"><GlossaryText text={item.new} /></span>
         </div>
       ))}
     </div>
     <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
     <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
-  </SectionCard>
+  </div>
 );
 
+// --- Review Section (NEW) ---
 export const ReviewSection: React.FC = () => {
   const [revealedTF, setRevealedTF] = useState<number[]>([]);
   const [revealedNotes, setRevealedNotes] = useState<number[]>([]);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [pendingNoteIdx, setPendingNoteIdx] = useState<number | null>(null);
 
-  const toggleRevealTF = (idx: number) => {
-    if (!revealedTF.includes(idx)) setRevealedTF([...revealedTF, idx]);
+  const toggleReveal = (idx: number) => {
+    setRevealedTF(prev => prev.includes(idx) ? prev : [...prev, idx]);
   };
 
-  const handleNoteClick = (idx: number) => {
+  const handleNoteUnlockRequest = (idx: number) => {
     if (revealedNotes.includes(idx)) return;
-    setPendingNoteIdx(idx);
-    setShowPasswordModal(true);
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordInput === 'omar2016') {
-      if (pendingNoteIdx !== null) setRevealedNotes([...revealedNotes, pendingNoteIdx]);
-      closeModal();
-    } else {
-      alert('كلمة المرور خاطئة');
-    }
-  };
-
-  const closeModal = () => {
-    setShowPasswordModal(false);
-    setPasswordInput('');
-    setPendingNoteIdx(null);
+    // UNLOCKED BY DEFAULT: Direct reveal without password
+    setRevealedNotes(prev => [...prev, idx]);
   };
 
   return (
-    <div className="space-y-10 pb-12">
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-10 rounded-3xl shadow-xl text-center"><MessageCircle size={40} className="mx-auto mb-4"/><h2 className="text-4xl font-black">المراجعة والنقاش</h2></div>
-      <div className="grid lg:grid-cols-2 gap-8">
-        <SectionCard>
-          <h3 className="font-bold text-2xl mb-8 flex gap-2"><CheckCircle2 className="text-green-500"/> صواب أم خطأ؟</h3>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-lg mb-8 text-center">
+        <h2 className="text-3xl font-bold mb-2 flex justify-center items-center gap-3">
+          <MessageCircle size={32} />
+          المراجعة والنقاش المفتوح
+        </h2>
+        <p className="opacity-90 text-lg">محطة لترسيخ المفاهيم وتبادل الآراء قبل الختام</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* True / False Activity */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-legal-200">
+          <h3 className="font-bold text-legal-900 mb-6 flex items-center gap-2 text-xl">
+            <CheckCircle2 className="text-green-500" />
+            صواب أم خطأ؟
+          </h3>
           <div className="space-y-4">
-            {REVIEW_CONTENT.trueFalse.map((item, i) => {
-              const isRevealed = revealedTF.includes(i);
+            {REVIEW_CONTENT.trueFalse.map((item, idx) => {
+              const isRevealed = revealedTF.includes(idx);
               return (
-                <div key={i} className="bg-legal-50 p-4 rounded-xl">
-                  <p className="font-bold mb-4 text-lg text-legal-900">{item.statement}</p>
+                <div key={idx} className="border-b border-legal-100 pb-4 last:border-0">
+                  <p className="font-medium text-legal-800 mb-3 text-lg">{item.statement}</p>
                   {!isRevealed ? (
                     <div className="flex gap-3">
-                      <button onClick={() => toggleRevealTF(i)} className="flex-1 bg-white border-2 border-legal-200 hover:border-green-500 hover:text-green-600 py-3 rounded-xl font-bold transition-all">صواب</button>
-                      <button onClick={() => toggleRevealTF(i)} className="flex-1 bg-white border-2 border-legal-200 hover:border-red-500 hover:text-red-600 py-3 rounded-xl font-bold transition-all">خطأ</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-green-100 text-legal-600 hover:text-green-700 py-2 rounded-lg font-bold transition-colors border border-legal-200">صواب</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-red-100 text-legal-600 hover:text-red-700 py-2 rounded-lg font-bold transition-colors border border-legal-200">خطأ</button>
                     </div>
                   ) : (
-                    <div className={`p-4 rounded-xl animate-fade-in border ${item.isTrue ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-                      <div className="flex items-center gap-2 font-bold mb-2 text-xl">{item.isTrue ? <Check size={24}/> : <X size={24}/>}{item.isTrue ? 'إجابة صحيحة' : 'إجابة خاطئة'}</div>
-                      <p className="font-medium">{item.correction}</p>
+                    <div className={`p-3 rounded-lg animate-fade-in ${item.isTrue ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      <div className="flex items-center gap-2 font-bold mb-1">
+                        {item.isTrue ? <Check size={18}/> : <X size={18}/>}
+                        {item.isTrue ? 'صحيح' : 'خطأ'}
+                      </div>
+                      <p className="text-sm">{item.correction}</p>
                     </div>
                   )}
                 </div>
               );
             })}
-          </div>
-        </SectionCard>
-        <SectionCard>
-          <h3 className="font-bold text-2xl mb-8 flex gap-2"><Users2 className="text-blue-600"/> محاور النقاش</h3>
-          <div className="space-y-6">
-            {REVIEW_CONTENT.topics.map((topic, i) => {
-              const isRevealed = revealedNotes.includes(i);
-              return (
-                <div key={i} className="bg-legal-50 p-6 rounded-xl border-r-4 border-gold-500 shadow-sm">
-                  <h4 className="font-black text-xl mb-4 text-legal-900">{topic.title}</h4>
-                  <ul className="space-y-3 mb-4">{topic.points.map((p, pi) => <li key={pi} className="flex items-start gap-2 text-legal-700 font-medium"><span className="text-gold-500 mt-1.5">•</span>{p}</li>)}</ul>
-                  {topic.teacherNotes && (
-                    <div className="mt-6 pt-4 border-t border-legal-200">
-                      {!isRevealed ? (
-                        <button onClick={() => handleNoteClick(i)} className="flex items-center gap-2 text-sm font-bold text-legal-400 hover:text-gold-600 transition-colors"><Lock size={14} /> كشف التوجيه الأكاديمي (للأستاذ)</button>
-                      ) : (
-                        <div className="bg-white p-4 rounded-xl border border-gold-200 shadow-sm animate-fade-in"><h5 className="text-xs font-bold text-gold-600 mb-2 flex items-center gap-1 uppercase tracking-wider"><Lightbulb size={14} /> توجيه أكاديمي</h5><p className="text-legal-800 leading-relaxed whitespace-pre-line">{topic.teacherNotes}</p></div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </SectionCard>
-      </div>
-      {showPasswordModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeModal}>
-          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all scale-100" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-12 bg-legal-50 rounded-full flex items-center justify-center mx-auto mb-4 text-legal-900"><Lock size={24} /></div>
-            <h4 className="font-black text-xl text-center mb-6 text-legal-900">مصادقة الأستاذ</h4>
-            <form onSubmit={handlePasswordSubmit}>
-              <input type="password" autoFocus placeholder="الرمز السري" className="w-full text-center p-4 border-2 border-legal-100 rounded-xl mb-4 font-mono text-lg focus:border-gold-500 outline-none transition-colors" value={passwordInput} onChange={e => setPasswordInput(e.target.value)}/>
-              <div className="flex gap-3"><button type="submit" className="flex-1 bg-legal-900 text-white py-3 rounded-xl font-bold hover:bg-legal-800 transition-colors">فتح</button><button type="button" onClick={closeModal} className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">إلغاء</button></div>
-            </form>
           </div>
         </div>
-      )}
+
+        {/* Open Discussion Topics */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-legal-200">
+           <h3 className="font-bold text-legal-900 mb-6 flex items-center gap-2 text-xl">
+            <Users2 className="text-blue-500" />
+            محاور للنقاش الجماعي
+          </h3>
+          <div className="space-y-6">
+             {REVIEW_CONTENT.topics.map((topic, idx) => {
+               const isNoteRevealed = revealedNotes.includes(idx);
+               return (
+                 <div key={idx} className="bg-legal-50 p-5 rounded-xl border-l-4 border-gold-500">
+                   <h4 className="font-bold text-legal-900 text-lg mb-3">{topic.title}</h4>
+                   <ul className="space-y-2 mb-4">
+                     {topic.points.map((point, pIdx) => (
+                       <li key={pIdx} className="flex items-center gap-2 text-legal-600">
+                         <span className="w-1.5 h-1.5 bg-legal-400 rounded-full" />
+                         {point}
+                       </li>
+                     ))}
+                   </ul>
+                   
+                   {/* Teacher Notes Reveal */}
+                   {topic.teacherNotes && (
+                     <div className="mt-4 pt-4 border-t border-legal-200">
+                       {!isNoteRevealed ? (
+                         <button 
+                           onClick={() => handleNoteUnlockRequest(idx)}
+                           className="text-xs flex items-center gap-1 text-legal-400 hover:text-gold-600 font-bold transition-colors"
+                         >
+                           <Unlock size={12} /> كشف التوجيه الأكاديمي (مفتوح)
+                         </button>
+                       ) : (
+                         <div className="bg-white p-3 rounded-lg border border-gold-200 shadow-sm animate-fade-in">
+                           <h5 className="text-xs font-bold text-gold-600 mb-1 flex items-center gap-1">
+                             <Lightbulb size={12} />
+                             توجيه أكاديمي:
+                           </h5>
+                           <p className="text-sm text-legal-800 leading-relaxed">{topic.teacherNotes}</p>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
+               );
+             })}
+          </div>
+          <div className="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm text-center">
+             يفتح الأستاذ المجال للمداخلات والآراء حول هذه القضايا المعاصرة.
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export const SummarySection: React.FC = () => {
-  return (
-    <div className="space-y-8 pb-12">
-      <div className="bg-legal-900 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-          <h2 className="text-3xl font-black mb-2 flex items-center gap-3">
-            <Book className="text-gold-500" size={32} />
-            الملخص النظري الشامل
-          </h2>
-          <p className="text-legal-300 text-lg">خلاصة المحاضرة في نقاط مركزة للحفظ والمراجعة.</p>
-        </div>
-        <button 
-          onClick={() => window.print()} 
-          className="bg-white text-legal-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-gold-400 transition-colors shadow-lg"
-        >
-          <Printer size={20} />
-          طباعة الملخص
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {SUMMARY_CARDS.map((card, idx) => (
-          <div key={idx} className="bg-white rounded-3xl shadow-soft overflow-hidden border border-legal-100 hover:shadow-xl transition-shadow">
-            <div className={`h-2 bg-gradient-to-r ${card.colorClass}`} />
-            <div className="p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white bg-gradient-to-br ${card.colorClass}`}>
-                  <card.icon size={24} />
+// --- Summary Section ---
+export const SummarySection: React.FC = () => (
+  <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-legal-200 overflow-hidden">
+    <div className="bg-legal-800 text-white p-6 flex items-center justify-between">
+      <h2 className="text-2xl font-bold flex items-center gap-3">
+        <Book className="text-gold-500" />
+        الملخص النظري الشامل
+      </h2>
+      <button className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition-colors" onClick={() => window.print()}>طباعة الملخص</button>
+    </div>
+    
+    <div className="p-8 bg-gray-50 grid gap-8">
+      {SUMMARY_CARDS.map((card) => {
+        const Icon = card.icon;
+        return (
+          <div key={card.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+            <div className={`bg-gradient-to-r ${card.colorClass} p-4 text-white flex items-center gap-3`}>
+              <Icon size={24} />
+              <h3 className="text-lg font-bold">{card.title}</h3>
+            </div>
+            <div className="p-6 space-y-6">
+              {card.content.map((section, idx) => (
+                <div key={idx}>
+                  {section.subtitle && <h4 className="font-bold text-legal-800 mb-3 border-b border-gray-100 pb-1 inline-block">{section.subtitle}</h4>}
+                  
+                  {section.type === 'timeline' ? (
+                    <div className="space-y-4 border-r-2 border-legal-200 pr-4">
+                      {section.items.map((item, i) => {
+                        const [title, desc] = item.split(':');
+                        return (
+                          <div key={i} className="relative">
+                            <div className="absolute top-2 -right-[21px] w-3 h-3 rounded-full bg-white border-2 border-legal-400" />
+                            <p className="text-sm text-legal-600 leading-relaxed">
+                              <strong className="text-legal-900">{title}:</strong> {desc}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : section.type === 'cards' ? (
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                       {section.items.map((item, i) => (
+                         <div key={i} className="bg-legal-50 p-3 rounded-lg text-sm text-legal-700 leading-relaxed border-r-4 border-legal-300">
+                           {item}
+                         </div>
+                       ))}
+                     </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {section.items.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-legal-700 leading-relaxed">
+                           <div className="w-1.5 h-1.5 bg-gold-500 rounded-full mt-2 shrink-0" />
+                           <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <h3 className="text-2xl font-black text-legal-900">{card.title}</h3>
-              </div>
-              
-              <div className="space-y-6">
-                {card.content.map((section, sIdx) => (
-                  <div key={sIdx} className="relative">
-                    {section.subtitle && <h4 className="font-bold text-legal-400 uppercase text-xs tracking-widest mb-3">{section.subtitle}</h4>}
-                    
-                    {section.type === 'list' && (
-                      <ul className="space-y-3">
-                        {section.items.map((item, i) => (
-                          <li key={i} className="flex items-start gap-3 text-legal-700 font-medium text-lg">
-                            <span className={`mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br ${card.colorClass}`} />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {section.type === 'cards' && (
-                      <div className="grid gap-3">
-                         {section.items.map((item, i) => {
-                           const [title, desc] = item.split(':');
-                           return (
-                             <div key={i} className="bg-legal-50 p-4 rounded-xl border border-legal-100">
-                               <span className="font-black text-legal-900 block mb-1">{title}</span>
-                               {desc && <span className="text-legal-600 block">{desc}</span>}
-                             </div>
-                           )
-                         })}
-                      </div>
-                    )}
-
-                    {section.type === 'timeline' && (
-                       <div className="relative border-r-2 border-legal-100 mr-3 space-y-6 py-2">
-                         {section.items.map((item, i) => {
-                            const [title, desc] = item.split(':');
-                            return (
-                              <div key={i} className="relative pr-6">
-                                <span className={`absolute -right-[9px] top-2 w-4 h-4 rounded-full border-2 border-white shadow-sm bg-gradient-to-br ${card.colorClass}`} />
-                                <span className="font-bold text-legal-900 block">{title}</span>
-                                <span className="text-legal-600">{desc}</span>
-                              </div>
-                            )
-                         })}
-                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      <div className="text-center text-legal-400 text-sm mt-8 font-mono">
-        تم إعداد هذا الملخص بناءً على مطبوعة د. إسالمة محمد أمين
-      </div>
+        );
+      })}
     </div>
-  );
-};
+  </div>
+);
 
+// --- Exit Ticket (Teacher Protected) ---
 export const ExitTicket: React.FC = () => {
   const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const handleTeacherLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -713,59 +923,69 @@ export const ExitTicket: React.FC = () => {
   if (view === 'teacherView') {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-3xl mx-auto text-center">
-        <div className="flex justify-between items-center mb-8 border-b pb-4">
-          <h2 className="text-2xl font-bold flex items-center gap-2"><Unlock className="text-green-500" /> ردود الطلاب</h2>
+        <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2"><Unlock className="text-green-500" /> لوحة تحكم الأستاذ</h2>
           <button onClick={() => { setView('student'); setPassword(''); }} className="text-sm text-red-500 hover:underline">خروج</button>
         </div>
         
-        <div className="py-12 bg-legal-50 rounded-2xl border-2 border-dashed border-legal-200">
-          <ClipboardCheck size={64} className="mx-auto text-legal-300 mb-6" />
-          <h3 className="text-xl font-bold text-legal-800 mb-2">لمشاهدة الردود الحقيقية</h3>
-          <p className="text-legal-500 mb-8 max-w-md mx-auto">يتم تخزين ردود الطلاب مباشرة في نماذج جوجل (Google Forms). يرجى الانتقال إلى لوحة التحكم هناك لمشاهدتها.</p>
-          
+        <div className="py-12">
+          <p className="text-lg text-legal-600 mb-8">اضغط أدناه لمشاهدة ردود الطلاب الحقيقية في Google Forms</p>
           <a 
             href={GOOGLE_FORM_RESPONSES_URL} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg transition-transform hover:scale-105"
+            className="inline-flex items-center gap-3 bg-green-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-700 transition-colors shadow-lg"
           >
-            <ExternalLink size={20} />
-            الذهاب إلى ردود جوجل (Google Sheets)
+            <FileText size={24} />
+            فتح صفحة الردود (Google Sheets)
           </a>
         </div>
       </div>
     );
   }
 
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-white rounded-2xl p-12 text-center shadow-sm">
+        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle2 size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-legal-900 mb-2">تم التسليم بنجاح!</h2>
+        <p className="text-legal-600">شكراً لمشاركتك. سيطلع الأستاذ على تعليقك لاحقاً.</p>
+        <button onClick={() => setSubmitted(false)} className="mt-8 text-sm text-legal-400 underline">إرسال رد آخر</button>
+        <div className="mt-12 pt-6 border-t w-full">
+          <button onClick={() => setView('teacherAuth')} className="text-xs text-gray-300 hover:text-gray-500">دخول الأستاذ</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <SectionCard className="max-w-4xl mx-auto border-t-8 border-legal-900">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-black text-legal-900 mb-3 flex justify-center items-center gap-3">
-            <div className="bg-gold-500 text-white p-2 rounded-lg"><ClipboardCheck size={28}/></div>
-            بطاقة الخروج
-        </h2>
-        <p className="text-legal-500 text-lg">املأ الاستمارة أدناه لتسجيل حضورك وملاحظاتك.</p>
+    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden border-t-8 border-legal-800 relative">
+      <div className="mb-6 text-center pt-8 px-8">
+        <h2 className="text-2xl font-bold text-legal-900">بطاقة الخروج</h2>
+        <p className="text-legal-500 mt-2">تذكر: لا تخرج قبل أن تترك أثراً!</p>
       </div>
       
-      <div className="relative w-full overflow-hidden bg-legal-50 rounded-xl border border-legal-200 min-h-[800px]">
+      <div className="w-full h-[600px] bg-gray-50">
          <iframe 
            src={GOOGLE_FORM_URL} 
            width="100%" 
-           height="800" 
+           height="100%" 
            frameBorder="0" 
            marginHeight={0} 
-           marginWidth={0} 
-           className="relative z-10"
+           marginWidth={0}
+           className="w-full h-full"
          >
            جاري التحميل...
          </iframe>
       </div>
       
-      <div className="mt-4 text-left">
-        <button onClick={() => setView('teacherAuth')} className="text-xs text-gray-400 hover:text-legal-600 font-bold px-4 py-2 rounded transition-colors">
-          دخول الأستاذ
+      <div className="p-4 bg-gray-50 border-t text-left">
+        <button onClick={() => setView('teacherAuth')} className="text-[10px] text-gray-400 p-2 hover:text-legal-600 flex items-center gap-1">
+           <Lock size={10} /> دخول الأستاذ
         </button>
       </div>
-    </SectionCard>
+    </div>
   );
 };
