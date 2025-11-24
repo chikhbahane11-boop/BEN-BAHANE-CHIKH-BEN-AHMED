@@ -7,13 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Cairo', 'sans-serif'],
+              sans: ['"IBM Plex Sans Arabic"', 'sans-serif'], // الخط الأساسي العصري
+              serif: ['"Amiri"', 'serif'], // الخط الرسمي والأكاديمي
+              hand: ['"Aref Ruqaa"', 'serif'], // خط الملاحظات
             },
             colors: {
               legal: {
@@ -42,27 +44,27 @@
               }
             },
             boxShadow: {
-              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-              'glow': '0 0 15px rgba(245, 158, 11, 0.3)',
+              'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+              'glow': '0 0 20px rgba(217, 119, 6, 0.15)',
+              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
             },
             animation: {
-              'fade-in': 'fadeIn 0.6s ease-out forwards',
-              'slide-up': 'slideUp 0.5s ease-out forwards',
+              'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               'bounce-in': 'bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
             keyframes: {
               fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               slideUp: {
                 '0%': { opacity: '0', transform: 'translateY(20px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               bounceIn: {
-                '0%': { transform: 'scale(0.9)', opacity: '0' },
-                '50%': { transform: 'scale(1.02)' },
+                '0%': { transform: 'scale(0.95)', opacity: '0' },
+                '60%': { transform: 'scale(1.02)' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
               }
             }
@@ -71,42 +73,62 @@
       }
     </script>
     <style>
-      /* Background Pattern */
+      /* Nano Pattern Background */
       body {
         background-color: #f8fafc;
-        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-        background-size: 24px 24px;
+        background-image: 
+          radial-gradient(#e2e8f0 1px, transparent 1px),
+          linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0));
+        background-size: 32px 32px, 100% 100%;
       }
       
-      /* Custom Scrollbar */
+      /* Premium Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
       }
       ::-webkit-scrollbar-track {
-        background: transparent;
+        background: rgba(226, 232, 240, 0.5);
       }
       ::-webkit-scrollbar-thumb {
-        background: #cbd5e1; 
-        border-radius: 10px;
-        border: 2px solid #f8fafc;
+        background: #94a3b8; 
+        border-radius: 99px;
+        border: 3px solid transparent;
+        background-clip: content-box;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8; 
+        background: #64748b; 
+        border: 3px solid transparent;
+        background-clip: content-box;
       }
       
-      /* Glossary Highlight */
+      /* Glossary Highlight Effect */
       .highlight-term {
-        border-bottom: 2px dotted #d97706;
+        border-bottom: 2px dashed #d97706;
         cursor: help;
-        transition: all 0.3s ease;
-        padding: 0 2px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0 4px;
         border-radius: 4px;
+        position: relative;
+        z-index: 1;
+      }
+      .highlight-term::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: #fffbeb;
+        border-radius: 4px;
+        z-index: -1;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
       }
       .highlight-term:hover {
-        background-color: #fffbeb;
         color: #92400e;
         border-bottom-style: solid;
+      }
+      .highlight-term:hover::before {
+        transform: scaleX(1);
       }
       
       /* Security */
@@ -135,12 +157,12 @@
         }
       });
     </script>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
     "vite": "https://aistudiocdn.com/vite@^7.2.4",
     "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
