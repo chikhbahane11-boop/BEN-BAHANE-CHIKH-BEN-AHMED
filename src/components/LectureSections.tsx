@@ -8,9 +8,6 @@ import {
   ShieldCheck, 
   Building2, 
   Users2,
-  Eye,
-  EyeOff,
-  MousePointerClick,
   HelpCircle,
   Play,
   XCircle,
@@ -19,7 +16,6 @@ import {
   BookOpen,
   Lock,
   Unlock,
-  Download,
   MessageCircle,
   BrainCircuit,
   Check,
@@ -28,7 +24,8 @@ import {
   Target,
   FileText,
   ClipboardCheck,
-  ExternalLink
+  ExternalLink,
+  History
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, 
@@ -59,10 +56,11 @@ import { LockedQuestion } from '../types';
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
 
-  // Safety Check: If text is missing/undefined, return nothing to prevent crash
+  // Safety Check
   if (!text) return null;
 
   const terms = Object.keys(GLOSSARY);
+  // Safe Regex construction
   const regex = new RegExp(`(${terms.join('|')})`, 'g');
   
   const parts = text.split(regex);
@@ -76,7 +74,7 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
               <span 
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setActiveTerm(part); }}
-                className="highlight-term px-1 rounded bg-yellow-50 text-legal-900 font-bold border-b-2 border-gold-500 cursor-pointer hover:bg-gold-100 transition-colors inline-block"
+                className="highlight-term px-1 rounded bg-yellow-50 text-legal-900 font-bold border-b-2 border-gold-500 cursor-pointer hover:bg-gold-100 transition-colors inline-block relative z-10"
                 title="اضغط للتعريف"
               >
                 {part}
@@ -108,18 +106,15 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
 
 // --- Helper: Rich Text with Bold/List support + Glossary ---
 const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
-  // Safety Check: If text is missing/undefined, return nothing
   if (!text) return null;
 
-  // First, handle structural parsing (lists, bold)
-  // Split by newlines to handle lists correctly
   const lines = text.split('\n');
   
   return (
     <div className="space-y-3">
       {lines.map((line, lineIdx) => {
         let content = line.trim();
-        if (!content) return null; // Skip empty lines
+        if (!content) return null; 
         
         // Handle List Item
         const isList = content.startsWith('* ');
@@ -134,11 +129,9 @@ const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
             <span className={`text-legal-700 leading-relaxed ${isList ? 'text-base' : 'text-lg'}`}>
                {parts.map((part, partIdx) => {
                  if (part.startsWith('**') && part.endsWith('**')) {
-                   // Render bold part
                    const cleanPart = part.substring(2, part.length - 2);
                    return <strong key={partIdx} className="text-legal-900 font-bold bg-gold-50 px-1 rounded"><GlossaryText text={cleanPart} /></strong>;
                  }
-                 // Render normal part
                  return <GlossaryText key={partIdx} text={part} />;
                })}
             </span>
@@ -149,7 +142,7 @@ const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-// --- Helper: Handout Excerpt Box (Styled as Academic Note) ---
+// --- Helper: Handout Excerpt Box ---
 const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, source }) => (
   <div className="my-8 bg-[#fffdf5] border border-gold-200 rounded-xl shadow-soft p-6 relative overflow-hidden group hover:shadow-md transition-shadow">
     <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-gold-100 to-transparent opacity-50 rounded-bl-3xl"></div>
@@ -167,10 +160,13 @@ const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, s
   </div>
 );
 
-// --- Reusable Teacher Locked Panel ---
+// --- Reusable Teacher Locked Panel (OPEN BY DEFAULT FOR STUDENTS) ---
 const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[] }> = ({ title = "أسئلة التفكير العميق", questions }) => {
-  // UNLOCKED BY DEFAULT - Ensure answers are visible
+  // OPEN BY DEFAULT
   const [isLocked, setIsLocked] = useState(false); 
+
+  // Safety check for empty questions
+  if (!questions || questions.length === 0) return null;
 
   return (
     <div className="mt-8 border border-legal-100 rounded-2xl overflow-hidden shadow-soft bg-white group hover:border-gold-200 transition-colors">
@@ -203,7 +199,8 @@ const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[]
             </div>
             
             <div className="relative mr-4 pr-6 border-r-2 border-legal-100">
-              <div className={`transition-all duration-700 ${isLocked ? 'blur-md select-none opacity-40' : 'blur-0 opacity-100'}`}>
+              {/* Force visible by default */}
+              <div className={`transition-all duration-300 ${isLocked ? 'blur-sm select-none opacity-20' : 'blur-0 opacity-100'}`}>
                 <div className="text-legal-700 leading-relaxed bg-green-50/50 p-5 rounded-xl border border-green-100/50">
                   <span className="font-bold text-green-700 ml-2 block mb-2 text-sm flex items-center gap-2">
                     <CheckCircle2 size={16}/> الإجابة النموذجية:
@@ -228,7 +225,7 @@ const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[]
   );
 };
 
-// --- Introduction Section (Story & Warm-up) ---
+// --- Introduction Section ---
 export const IntroSection: React.FC = () => {
   const [showStoryReveal, setShowStoryReveal] = useState(false);
   const [warmUpWord, setWarmUpWord] = useState('');
@@ -241,10 +238,8 @@ export const IntroSection: React.FC = () => {
 
   return (
     <div className="space-y-12 animate-fade-in pb-12">
-
-      {/* Official Academic Header (Calligraphy Style) */}
+      {/* Official Academic Header */}
       <div className="text-center space-y-3 mb-12 pb-10 border-b border-legal-200 bg-white p-10 rounded-3xl shadow-soft relative overflow-hidden">
-         {/* Decorative Corner */}
          <div className="absolute top-0 right-0 w-32 h-32 bg-legal-50 rounded-bl-[100px] -z-0"></div>
          <div className="absolute top-0 left-0 w-32 h-32 bg-legal-50 rounded-br-[100px] -z-0"></div>
          
@@ -423,7 +418,6 @@ export const IntroSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Teacher Locked Panel for Intro */}
       <TeacherLockedPanel questions={INTRO_DEEP_DIVE} />
     </div>
   );
@@ -459,7 +453,6 @@ export const ComponentsSection: React.FC = () => {
                 }
               `}
             >
-              {/* Background Number */}
               <span className={`absolute top-4 left-6 text-6xl font-black opacity-5 font-serif transition-colors ${isActive ? 'text-white' : 'text-legal-900'}`}>
                   0{idx + 1}
               </span>
@@ -473,7 +466,6 @@ export const ComponentsSection: React.FC = () => {
                 </h3>
               </div>
               
-              {/* Hide Description when Active, Show when Inactive */}
               {!isActive && (
                 <div className="mb-4 leading-loose text-base text-legal-600 line-clamp-3 relative z-10 font-medium">
                    <GlossaryText text={comp.description} />
@@ -529,8 +521,6 @@ export const HistorySection: React.FC = () => {
   const [showQuiz, setShowQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  
-  // UNLOCKED BY DEFAULT
   const [isQuizLocked, setIsQuizLocked] = useState(false); 
 
   const activeEvent = HISTORY_EVENTS[activeTab];
@@ -644,7 +634,19 @@ export const HistorySection: React.FC = () => {
               </div>
             </div>
             
-            {/* Replaced custom locked section with generic component if questions exist */}
+            {/* Modern Impact (Added per user request) */}
+            {activeEvent.modernImpact && (
+              <div className="bg-green-50 border border-green-100 rounded-xl p-6 mb-8 shadow-sm">
+                <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                  <Globe size={18} />
+                  الأثر في عالمنا اليوم:
+                </h4>
+                <p className="text-green-900 leading-relaxed font-medium">
+                  <GlossaryText text={activeEvent.modernImpact} />
+                </p>
+              </div>
+            )}
+
             {activeEvent.discussionQuestions && (
                <TeacherLockedPanel title="مناقشة تاريخية معمقة" questions={activeEvent.discussionQuestions} />
             )}
@@ -810,15 +812,18 @@ export const SubjectsSection: React.FC = () => {
       
       <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
       
-      <div className="bg-gradient-to-r from-legal-800 to-legal-900 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-soft relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gold-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500"></div>
-        <div className="relative z-10 mb-6 md:mb-0">
-          <h3 className="text-3xl font-bold mb-3 font-serif text-gold-400">لعبة: خبير التصنيف الدولي</h3>
-          <p className="opacity-80 text-lg max-w-md leading-relaxed">تحدَّ نفسك واختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي في 60 ثانية.</p>
+      {/* Game Card Wrapper */}
+      <div className="relative z-10">
+        <div className="bg-gradient-to-r from-legal-800 to-legal-900 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-soft relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gold-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500"></div>
+            <div className="relative z-10 mb-6 md:mb-0">
+            <h3 className="text-3xl font-bold mb-3 font-serif text-gold-400">لعبة: خبير التصنيف الدولي</h3>
+            <p className="opacity-80 text-lg max-w-md leading-relaxed">تحدَّ نفسك واختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي في 60 ثانية.</p>
+            </div>
+            <button onClick={() => setMode('play')} className="bg-gold-500 text-legal-900 px-10 py-4 rounded-2xl font-bold hover:bg-white hover:scale-105 transition-all shadow-glow flex gap-3 items-center text-lg">
+            <Play size={24} fill="currentColor" /> ابدأ التحدي
+            </button>
         </div>
-        <button onClick={() => setMode('play')} className="bg-gold-500 text-legal-900 px-10 py-4 rounded-2xl font-bold hover:bg-white hover:scale-105 transition-all shadow-glow flex gap-3 items-center text-lg">
-          <Play size={24} fill="currentColor" /> ابدأ التحدي
-        </button>
       </div>
 
       <TeacherLockedPanel questions={SUBJECTS_DEEP_DIVE} />
@@ -841,7 +846,7 @@ export const ModernConnectSection: React.FC = () => (
 
     <div className="grid gap-6 mb-10">
       {MODERN_EXAMPLES.map((item, i) => (
-        <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-legal-50/50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
+        <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-slate-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
           <div className="flex flex-col sm:w-1/3">
              <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">{item.old}</span>
              <span className="text-[11px] text-legal-400 font-bold uppercase tracking-wider mt-1">{item.period}</span>
@@ -862,7 +867,7 @@ export const ModernConnectSection: React.FC = () => (
   </div>
 );
 
-// --- Review Section (NEW) ---
+// --- Review Section ---
 export const ReviewSection: React.FC = () => {
   const [revealedTF, setRevealedTF] = useState<number[]>([]);
   const [revealedNotes, setRevealedNotes] = useState<number[]>([]);
