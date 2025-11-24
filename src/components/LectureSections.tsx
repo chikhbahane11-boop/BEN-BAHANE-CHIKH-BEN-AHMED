@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
@@ -58,6 +59,9 @@ import { LockedQuestion } from '../types';
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
 
+  // Safety Check: If text is missing/undefined, return nothing to prevent crash
+  if (!text) return null;
+
   const terms = Object.keys(GLOSSARY);
   const regex = new RegExp(`(${terms.join('|')})`, 'g');
   
@@ -104,6 +108,9 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
 
 // --- Helper: Rich Text with Bold/List support + Glossary ---
 const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
+  // Safety Check: If text is missing/undefined, return nothing
+  if (!text) return null;
+
   // First, handle structural parsing (lists, bold)
   // Split by newlines to handle lists correctly
   const lines = text.split('\n');
@@ -112,6 +119,7 @@ const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
     <div className="space-y-3">
       {lines.map((line, lineIdx) => {
         let content = line.trim();
+        if (!content) return null; // Skip empty lines
         
         // Handle List Item
         const isList = content.startsWith('* ');
@@ -161,9 +169,8 @@ const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, s
 
 // --- Reusable Teacher Locked Panel ---
 const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[] }> = ({ title = "أسئلة التفكير العميق", questions }) => {
-  // UNLOCKED BY DEFAULT
+  // UNLOCKED BY DEFAULT - Ensure answers are visible
   const [isLocked, setIsLocked] = useState(false); 
-  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="mt-8 border border-legal-100 rounded-2xl overflow-hidden shadow-soft bg-white group hover:border-gold-200 transition-colors">
@@ -197,8 +204,10 @@ const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[]
             
             <div className="relative mr-4 pr-6 border-r-2 border-legal-100">
               <div className={`transition-all duration-700 ${isLocked ? 'blur-md select-none opacity-40' : 'blur-0 opacity-100'}`}>
-                <div className="text-legal-700 leading-relaxed bg-legal-50/50 p-5 rounded-xl border border-legal-100/50">
-                  <span className="font-bold text-gold-600 ml-2 block mb-2 text-sm">💡 الإجابة النموذجية:</span>
+                <div className="text-legal-700 leading-relaxed bg-green-50/50 p-5 rounded-xl border border-green-100/50">
+                  <span className="font-bold text-green-700 ml-2 block mb-2 text-sm flex items-center gap-2">
+                    <CheckCircle2 size={16}/> الإجابة النموذجية:
+                  </span>
                   {q.modelAnswer}
                 </div>
               </div>
