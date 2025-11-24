@@ -259,7 +259,12 @@ export const IntroSection: React.FC = () => {
                 <h3 className="font-serif text-legal-600 text-lg sm:text-xl">مركز تمنراست - ملحقة عين صالح</h3>
             </div>
             
-            <div className="mt-10 inline-block relative group">
+            <div className="mt-8 space-y-2 border-t border-legal-50 pt-6 w-fit mx-auto px-10">
+                 <h3 className="font-serif font-bold text-legal-800 text-xl">مقياس: المجتمع الدولي</h3>
+                 <h3 className="font-serif text-legal-600 text-lg">الموسم الدراسي: 2025/2026</h3>
+            </div>
+            
+            <div className="mt-8 inline-block relative group">
                 <div className="absolute inset-0 bg-gold-200 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
                 <span className="relative bg-white text-legal-900 px-10 py-3 rounded-full font-bold shadow-card border border-legal-100 inline-flex items-center gap-3 text-sm sm:text-base font-sans">
                   <span className="text-gold-600 font-extrabold">إعداد الأستاذ:</span> الشيخ بن بحان
