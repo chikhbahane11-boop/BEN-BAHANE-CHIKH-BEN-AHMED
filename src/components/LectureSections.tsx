@@ -103,6 +103,45 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+// --- Helper: Rich Text with Bold/List support + Glossary ---
+const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
+  // First, handle structural parsing (lists, bold)
+  // Split by newlines to handle lists correctly
+  const lines = text.split('\n');
+  
+  return (
+    <div className="space-y-2">
+      {lines.map((line, lineIdx) => {
+        let content = line.trim();
+        
+        // Handle List Item
+        const isList = content.startsWith('* ');
+        if (isList) content = content.substring(2);
+
+        // Handle Bold (**text**)
+        const parts = content.split(/(\*\*.*?\*\*)/g);
+        
+        return (
+          <div key={lineIdx} className={`${isList ? 'flex items-start gap-2 mr-2' : ''}`}>
+            {isList && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 mt-2 shrink-0" />}
+            <span className={`text-legal-800 leading-relaxed ${isList ? 'text-sm' : ''}`}>
+               {parts.map((part, partIdx) => {
+                 if (part.startsWith('**') && part.endsWith('**')) {
+                   // Render bold part
+                   const cleanPart = part.substring(2, part.length - 2);
+                   return <strong key={partIdx} className="text-legal-900 font-bold"><GlossaryText text={cleanPart} /></strong>;
+                 }
+                 // Render normal part
+                 return <GlossaryText key={partIdx} text={part} />;
+               })}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 // --- Helper: Handout Excerpt Box ---
 const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, source }) => (
   <div className="my-8 bg-legal-50 border-r-4 border-legal-400 p-6 rounded-lg shadow-inner relative overflow-hidden">
@@ -189,6 +228,21 @@ export const IntroSection: React.FC = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
+
+      {/* Official Academic Header */}
+      <div className="text-center space-y-2 mb-10 pb-8 border-b-2 border-legal-200/60 bg-gradient-to-b from-white to-legal-50/30 p-6 rounded-2xl shadow-sm border border-legal-100">
+        <h2 className="font-extrabold text-legal-800 text-lg sm:text-2xl font-serif tracking-wide">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
+        <h3 className="font-bold text-legal-600 text-base sm:text-xl">وزارة التعليم العالي والبحث العلمي</h3>
+        <div className="w-16 h-1 bg-gold-500 mx-auto my-3 rounded-full opacity-60"></div>
+        <h3 className="font-bold text-legal-900 text-lg sm:text-2xl mt-4 leading-relaxed">جامعة التكوين المتواصل ديدوش مراد</h3>
+        <h3 className="font-bold text-legal-700 text-base sm:text-lg">مركز تمنراست - ملحقة عين صالح</h3>
+        
+        <div className="mt-8">
+            <span className="bg-white text-legal-900 px-8 py-3 rounded-full font-bold shadow-md border border-legal-200 inline-flex items-center gap-2 text-sm sm:text-base">
+              <span className="text-gold-600">إعداد:</span> الشيخ بن بحان
+            </span>
+        </div>
+      </div>
 
       {/* Learning Objectives */}
       <div className="bg-white rounded-2xl shadow-sm border-l-8 border-gold-500 p-6 flex flex-col md:flex-row items-center gap-6">
@@ -428,10 +482,10 @@ export const HistorySection: React.FC = () => {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-xl flex flex-col h-full">
-                    <GlossaryText text={parts[0]} />
+                    <RichGlossaryText text={parts[0]} />
                 </div>
                 <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-xl flex flex-col h-full">
-                    <GlossaryText text={parts[1]} />
+                    <RichGlossaryText text={parts[1]} />
                 </div>
             </div>
         );
@@ -440,7 +494,7 @@ export const HistorySection: React.FC = () => {
     return (
         <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-xl mb-8">
              <h4 className="font-bold text-blue-900 mb-3 flex items-center gap-2"><BookOpen size={18}/> تفاصيل المحطة التاريخية</h4>
-             <GlossaryText text={text} />
+             <RichGlossaryText text={text} />
         </div>
     );
   };
