@@ -51,16 +51,17 @@ import {
 } from '../constants';
 import { LockedQuestion } from '../types';
 
-// --- Helper: Text with Glossary (Safe Version) ---
+// --- Helper: Text with Glossary (Ultra Safe Version) ---
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
 
-  // CRITICAL FIX: Ensure text exists before processing
-  if (!text) return null;
+  // Safety Check: If text is missing or not a string, render nothing or fallback
+  if (!text || typeof text !== 'string') return null;
 
   const terms = Object.keys(GLOSSARY);
+  if (terms.length === 0) return <>{text}</>;
+
   const regex = new RegExp(`(${terms.join('|')})`, 'g');
-  
   const parts = text.split(regex);
 
   return (
@@ -102,10 +103,9 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-// --- Helper: Rich Text with Bold/List support + Glossary (Safe Version) ---
+// --- Helper: Rich Text (Ultra Safe Version) ---
 const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
-  // CRITICAL FIX: Ensure text exists
-  if (!text) return <span className="text-red-400 text-xs">...</span>;
+  if (!text || typeof text !== 'string') return <span className="text-gray-400 text-xs">...</span>;
 
   const lines = text.split('\n');
   
@@ -724,7 +724,7 @@ export const HistorySection: React.FC = () => {
   );
 };
 
-// --- Subjects Section ---
+// --- Subjects Section (ROBUST VERSION) ---
 export const SubjectsSection: React.FC = () => {
   const [mode, setMode] = useState<'learn' | 'play'>('learn');
   const [score, setScore] = useState(0);
@@ -732,22 +732,34 @@ export const SubjectsSection: React.FC = () => {
   const [lastFeedback, setLastFeedback] = useState<{msg: string, correct: boolean} | null>(null);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Safety check for empty game items
-  if (!CLASSIFICATION_GAME_ITEMS || CLASSIFICATION_GAME_ITEMS.length === 0) {
-    return <div className="p-10 text-center text-legal-500">جاري تحميل اللعبة...</div>;
+  // CRITICAL FIX: Ensure game data exists
+  const hasGameItems = CLASSIFICATION_GAME_ITEMS && CLASSIFICATION_GAME_ITEMS.length > 0;
+
+  if (!hasGameItems) {
+    return <div className="p-10 text-center text-legal-500">جاري تحميل بيانات اللعبة...</div>;
   }
 
   const handleGameChoice = (type: 'state' | 'org' | 'special') => {
+    // Safety check
+    if (gameIndex >= CLASSIFICATION_GAME_ITEMS.length) return;
+
     const item = CLASSIFICATION_GAME_ITEMS[gameIndex];
     const isCorrect = item.type === type;
+    
     if (isCorrect) setScore(s => s + 1);
-    setLastFeedback({ msg: isCorrect ? item.feedback : 'خطأ! حاول التذكر.', correct: isCorrect });
+    
+    setLastFeedback({ 
+      msg: isCorrect ? item.feedback : 'إجابة خاطئة! حاول التذكر.', 
+      correct: isCorrect 
+    });
     
     setTimeout(() => {
       if (gameIndex < CLASSIFICATION_GAME_ITEMS.length - 1) {
         setGameIndex(g => g + 1);
         setLastFeedback(null);
-      } else setIsFinished(true);
+      } else {
+        setIsFinished(true);
+      }
     }, 1500);
   };
 
@@ -759,47 +771,54 @@ export const SubjectsSection: React.FC = () => {
     setMode('learn');
   };
 
-  if (mode === 'play') return (
-    <div className="bg-legal-900 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500/50">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-      
-      {!isFinished ? (
-        <div className="relative z-10">
-          <div className="flex justify-between text-legal-400 mb-10 text-sm font-mono tracking-wider">
-            <span>Question {gameIndex + 1} / {CLASSIFICATION_GAME_ITEMS.length}</span>
-            <span className="text-gold-400">Score: {score}</span>
-          </div>
-          
-          <div className="mb-12">
-             <h3 className="text-legal-300 mb-6 text-lg font-light">ما هو التصنيف القانوني لهذا الكيان؟</h3>
-             <h2 className="text-5xl font-black mb-4 font-serif text-white drop-shadow-lg">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
-          </div>
-          
-          {lastFeedback ? (
-            <div className={`p-8 rounded-2xl text-2xl font-bold animate-bounce-in shadow-xl ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-              {lastFeedback.msg}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              <button onClick={() => handleGameChoice('state')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">دولة <span className="block text-xs font-normal opacity-70 mt-1">شخص أصلي</span></button>
-              <button onClick={() => handleGameChoice('org')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">منظمة <span className="block text-xs font-normal opacity-70 mt-1">شخص وظيفي</span></button>
-              <button onClick={() => handleGameChoice('special')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">وضع خاص <span className="block text-xs font-normal opacity-70 mt-1">حالة استثنائية</span></button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="py-10 animate-fade-in relative z-10">
-          <div className="w-24 h-24 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-glow">
-              <Trophy size={48} className="text-legal-900" />
-          </div>
-          <h2 className="text-4xl font-bold mb-4 font-serif">انتهى التحدي!</h2>
-          <p className="text-2xl mb-12 text-gold-200">نتيجتك النهائية: <span className="font-mono font-bold text-white text-3xl mx-2">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
-          <button onClick={resetGame} className="bg-white text-legal-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-gold-400 transition-colors shadow-lg">العودة للدرس</button>
-        </div>
-      )}
-    </div>
-  );
+  // RENDER GAME MODE
+  if (mode === 'play') {
+    // Safety guard for rendering current item
+    const currentItem = CLASSIFICATION_GAME_ITEMS[gameIndex];
 
+    return (
+      <div className="bg-legal-900 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500/50">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+        
+        {!isFinished && currentItem ? (
+          <div className="relative z-10">
+            <div className="flex justify-between text-legal-400 mb-10 text-sm font-mono tracking-wider">
+              <span>Question {gameIndex + 1} / {CLASSIFICATION_GAME_ITEMS.length}</span>
+              <span className="text-gold-400">Score: {score}</span>
+            </div>
+            
+            <div className="mb-12">
+               <h3 className="text-legal-300 mb-6 text-lg font-light">ما هو التصنيف القانوني لهذا الكيان؟</h3>
+               <h2 className="text-5xl font-black mb-4 font-serif text-white drop-shadow-lg">{currentItem.name}</h2>
+            </div>
+            
+            {lastFeedback ? (
+              <div className={`p-8 rounded-2xl text-2xl font-bold animate-bounce-in shadow-xl ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                {lastFeedback.msg}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <button onClick={() => handleGameChoice('state')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">دولة <span className="block text-xs font-normal opacity-70 mt-1">شخص أصلي</span></button>
+                <button onClick={() => handleGameChoice('org')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">منظمة <span className="block text-xs font-normal opacity-70 mt-1">شخص وظيفي</span></button>
+                <button onClick={() => handleGameChoice('special')} className="p-6 bg-white/10 hover:bg-gold-500 hover:text-legal-900 rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">وضع خاص <span className="block text-xs font-normal opacity-70 mt-1">حالة استثنائية</span></button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="py-10 animate-fade-in relative z-10">
+            <div className="w-24 h-24 bg-gold-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-glow">
+                <Trophy size={48} className="text-legal-900" />
+            </div>
+            <h2 className="text-4xl font-bold mb-4 font-serif">انتهى التحدي!</h2>
+            <p className="text-2xl mb-12 text-gold-200">نتيجتك النهائية: <span className="font-mono font-bold text-white text-3xl mx-2">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
+            <button onClick={resetGame} className="bg-white text-legal-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-gold-400 transition-colors shadow-lg">العودة للدرس</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // RENDER LEARN MODE
   return (
     <div className="space-y-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -838,7 +857,7 @@ export const SubjectsSection: React.FC = () => {
   );
 };
 
-// --- Modern Section ---
+// --- Modern Section (ROBUST VERSION) ---
 export const ModernConnectSection: React.FC = () => {
   // Safety check for modern examples
   if (!MODERN_EXAMPLES || MODERN_EXAMPLES.length === 0) {
@@ -861,8 +880,11 @@ export const ModernConnectSection: React.FC = () => {
         {MODERN_EXAMPLES.map((item, i) => (
           <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-slate-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
             <div className="flex flex-col sm:w-1/3">
-              <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">{item.old}</span>
-              <span className="text-[11px] text-legal-400 font-bold uppercase tracking-wider mt-1">{item.period}</span>
+              <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">
+                {/* Use safe text renderer */}
+                <GlossaryText text={item.old || ""} />
+              </span>
+              <span className="text-[11px] text-legal-400 font-bold uppercase tracking-wider mt-1">{item.period || ""}</span>
             </div>
             
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-legal-200 text-legal-300 my-4 sm:my-0 shadow-sm group-hover:border-gold-300 group-hover:text-gold-500 transition-colors">
@@ -870,7 +892,10 @@ export const ModernConnectSection: React.FC = () => {
             </div>
             
             <div className="sm:w-1/2 text-left">
-              <span className="font-bold text-white bg-legal-800 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg"><GlossaryText text={item.new} /></span>
+              <span className="font-bold text-white bg-legal-800 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg">
+                {/* Use safe text renderer */}
+                <GlossaryText text={item.new || ""} />
+              </span>
             </div>
           </div>
         ))}
