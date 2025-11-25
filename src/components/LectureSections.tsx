@@ -51,6 +51,11 @@ import {
 } from '../constants';
 import { LockedQuestion } from '../types';
 
+// Utility to escape special characters for Regex
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
+}
+
 // --- Helper: Text with Glossary (Ultra Safe Version) ---
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
@@ -61,7 +66,9 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const terms = Object.keys(GLOSSARY);
   if (terms.length === 0) return <>{text}</>;
 
-  const regex = new RegExp(`(${terms.join('|')})`, 'g');
+  // Escape terms to prevent regex errors with parentheses or special chars
+  const escapedTerms = terms.map(escapeRegExp);
+  const regex = new RegExp(`(${escapedTerms.join('|')})`, 'g');
   const parts = text.split(regex);
 
   return (
@@ -878,7 +885,7 @@ export const ModernConnectSection: React.FC = () => {
 
       <div className="grid gap-6 mb-10">
         {MODERN_EXAMPLES.map((item, i) => (
-          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-slate-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
+          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-legal-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
             <div className="flex flex-col sm:w-1/3">
               <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">
                 {/* Use safe text renderer */}
