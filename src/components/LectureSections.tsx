@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
@@ -52,15 +51,14 @@ import {
 } from '../constants';
 import { LockedQuestion } from '../types';
 
-// --- Helper: Text with Glossary ---
+// --- Helper: Text with Glossary (Safe Version) ---
 const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   const [activeTerm, setActiveTerm] = useState<string | null>(null);
 
-  // Safety Check
+  // CRITICAL FIX: Ensure text exists before processing
   if (!text) return null;
 
   const terms = Object.keys(GLOSSARY);
-  // Safe Regex construction
   const regex = new RegExp(`(${terms.join('|')})`, 'g');
   
   const parts = text.split(regex);
@@ -104,9 +102,10 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-// --- Helper: Rich Text with Bold/List support + Glossary ---
+// --- Helper: Rich Text with Bold/List support + Glossary (Safe Version) ---
 const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
-  if (!text) return null;
+  // CRITICAL FIX: Ensure text exists
+  if (!text) return <span className="text-red-400 text-xs">...</span>;
 
   const lines = text.split('\n');
   
@@ -160,17 +159,14 @@ const HandoutBox: React.FC<{ content: string, source?: string }> = ({ content, s
   </div>
 );
 
-// --- Reusable Teacher Locked Panel (OPEN BY DEFAULT FOR STUDENTS) ---
+// --- Reusable Teacher Locked Panel (OPEN BY DEFAULT) ---
 const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[] }> = ({ title = "أسئلة التفكير العميق", questions }) => {
-  // OPEN BY DEFAULT
-  const [isLocked, setIsLocked] = useState(false); 
+  const [isLocked, setIsLocked] = useState(false); // Default Open
 
-  // Safety check for empty questions
   if (!questions || questions.length === 0) return null;
 
   return (
     <div className="mt-8 border border-legal-100 rounded-2xl overflow-hidden shadow-soft bg-white group hover:border-gold-200 transition-colors">
-      {/* Header */}
       <div className="bg-gradient-to-r from-legal-50/80 to-white p-5 border-b border-legal-100 flex justify-between items-center">
         <h3 className="font-bold text-legal-800 flex items-center gap-3 text-lg">
           <div className="bg-white p-2 rounded-lg shadow-sm text-gold-600">
@@ -187,7 +183,6 @@ const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[]
         </button>
       </div>
 
-      {/* Content */}
       <div className="p-6 bg-white">
         {questions.map((q, i) => (
           <div key={i} className="mb-8 last:mb-0">
@@ -199,7 +194,7 @@ const TeacherLockedPanel: React.FC<{ title?: string, questions: LockedQuestion[]
             </div>
             
             <div className="relative mr-4 pr-6 border-r-2 border-legal-100">
-              {/* Force visible by default */}
+               {/* Answer Visibility Logic: No blur if unlocked */}
               <div className={`transition-all duration-300 ${isLocked ? 'blur-sm select-none opacity-20' : 'blur-0 opacity-100'}`}>
                 <div className="text-legal-700 leading-relaxed bg-green-50/50 p-5 rounded-xl border border-green-100/50">
                   <span className="font-bold text-green-700 ml-2 block mb-2 text-sm flex items-center gap-2">
@@ -468,11 +463,18 @@ export const ComponentsSection: React.FC = () => {
               
               {!isActive && (
                 <div className="mb-4 leading-loose text-base text-legal-600 line-clamp-3 relative z-10 font-medium">
-                   <GlossaryText text={comp.description} />
+                   {/* Don't show full text when closed to keep it clean */}
                 </div>
               )}
               
               <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isActive ? 'max-h-[800px] opacity-100 pt-4' : 'max-h-0 opacity-0'}`}>
+                {/* Description Text shown ONLY when active */}
+                {isActive && (
+                  <div className="mb-8 leading-loose text-lg text-gray-300 relative z-10 font-medium border-b border-legal-700 pb-6">
+                     <GlossaryText text={comp.description} />
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                     <div>
                          <p className="text-sm font-bold text-gold-400 mb-4 uppercase tracking-wider flex items-center gap-2">
@@ -634,7 +636,7 @@ export const HistorySection: React.FC = () => {
               </div>
             </div>
             
-            {/* Modern Impact (Added per user request) */}
+            {/* Modern Impact */}
             {activeEvent.modernImpact && (
               <div className="bg-green-50 border border-green-100 rounded-xl p-6 mb-8 shadow-sm">
                 <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
@@ -729,6 +731,11 @@ export const SubjectsSection: React.FC = () => {
   const [gameIndex, setGameIndex] = useState(0);
   const [lastFeedback, setLastFeedback] = useState<{msg: string, correct: boolean} | null>(null);
   const [isFinished, setIsFinished] = useState(false);
+
+  // Safety check for empty game items
+  if (!CLASSIFICATION_GAME_ITEMS || CLASSIFICATION_GAME_ITEMS.length === 0) {
+    return <div className="p-10 text-center text-legal-500">جاري تحميل اللعبة...</div>;
+  }
 
   const handleGameChoice = (type: 'state' | 'org' | 'special') => {
     const item = CLASSIFICATION_GAME_ITEMS[gameIndex];
@@ -832,40 +839,47 @@ export const SubjectsSection: React.FC = () => {
 };
 
 // --- Modern Section ---
-export const ModernConnectSection: React.FC = () => (
-  <div className="bg-white rounded-3xl shadow-soft p-10 border border-legal-100">
-    <div className="flex items-center gap-4 mb-10 pb-6 border-b border-legal-100">
-        <div className="bg-gold-100 p-3 rounded-xl text-gold-700">
-            <Globe size={32} />
-        </div>
-        <div>
-            <h3 className="text-3xl font-bold text-legal-900 font-serif">ربط الماضي بالحاضر</h3>
-            <p className="text-legal-500 text-sm mt-1">كيف تحولت مبادئ الأجداد إلى قوانين الأحفاد؟</p>
-        </div>
-    </div>
+export const ModernConnectSection: React.FC = () => {
+  // Safety check for modern examples
+  if (!MODERN_EXAMPLES || MODERN_EXAMPLES.length === 0) {
+    return <div className="p-10 text-center text-legal-500">جاري تحميل المحتوى...</div>;
+  }
 
-    <div className="grid gap-6 mb-10">
-      {MODERN_EXAMPLES.map((item, i) => (
-        <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-slate-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
-          <div className="flex flex-col sm:w-1/3">
-             <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">{item.old}</span>
-             <span className="text-[11px] text-legal-400 font-bold uppercase tracking-wider mt-1">{item.period}</span>
+  return (
+    <div className="bg-white rounded-3xl shadow-soft p-10 border border-legal-100">
+      <div className="flex items-center gap-4 mb-10 pb-6 border-b border-legal-100">
+          <div className="bg-gold-100 p-3 rounded-xl text-gold-700">
+              <Globe size={32} />
           </div>
-          
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-legal-200 text-legal-300 my-4 sm:my-0 shadow-sm group-hover:border-gold-300 group-hover:text-gold-500 transition-colors">
-              <ArrowRight className="rotate-90 sm:rotate-180" size={20} />
+          <div>
+              <h3 className="text-3xl font-bold text-legal-900 font-serif">ربط الماضي بالحاضر</h3>
+              <p className="text-legal-500 text-sm mt-1">كيف تحولت مبادئ الأجداد إلى قوانين الأحفاد؟</p>
           </div>
-          
-          <div className="sm:w-1/2 text-left">
-             <span className="font-bold text-white bg-legal-800 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg"><GlossaryText text={item.new} /></span>
+      </div>
+
+      <div className="grid gap-6 mb-10">
+        {MODERN_EXAMPLES.map((item, i) => (
+          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-slate-50 rounded-2xl border border-legal-200 hover:border-gold-400 hover:bg-white hover:shadow-md transition-all group">
+            <div className="flex flex-col sm:w-1/3">
+              <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors font-serif">{item.old}</span>
+              <span className="text-[11px] text-legal-400 font-bold uppercase tracking-wider mt-1">{item.period}</span>
+            </div>
+            
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-legal-200 text-legal-300 my-4 sm:my-0 shadow-sm group-hover:border-gold-300 group-hover:text-gold-500 transition-colors">
+                <ArrowRight className="rotate-90 sm:rotate-180" size={20} />
+            </div>
+            
+            <div className="sm:w-1/2 text-left">
+              <span className="font-bold text-white bg-legal-800 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg"><GlossaryText text={item.new} /></span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
+      <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
     </div>
-    <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
-    <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
-  </div>
-);
+  );
+};
 
 // --- Review Section ---
 export const ReviewSection: React.FC = () => {

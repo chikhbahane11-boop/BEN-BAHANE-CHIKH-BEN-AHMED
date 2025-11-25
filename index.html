@@ -7,15 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"IBM Plex Sans Arabic"', 'sans-serif'], // الخط الأساسي العصري
-              serif: ['"Amiri"', 'serif'], // الخط الرسمي والأكاديمي
-              hand: ['"Aref Ruqaa"', 'serif'], // خط الملاحظات
+              sans: ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'], // خط عصري للقراءة
+              serif: ['"Amiri"', 'Georgia', 'serif'], // خط رسمي للعناوين
             },
             colors: {
               legal: {
@@ -44,27 +43,26 @@
               }
             },
             boxShadow: {
-              'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-              'glow': '0 0 20px rgba(217, 119, 6, 0.15)',
-              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+              'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025)',
+              'glow': '0 0 15px rgba(245, 158, 11, 0.3)',
             },
             animation: {
-              'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'bounce-in': 'bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'slide-up': 'slideUp 0.5s ease-out forwards',
+              'bounce-in': 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
             },
             keyframes: {
               fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
               },
               slideUp: {
                 '0%': { opacity: '0', transform: 'translateY(20px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               bounceIn: {
-                '0%': { transform: 'scale(0.95)', opacity: '0' },
-                '60%': { transform: 'scale(1.02)' },
+                '0%': { transform: 'scale(0.9)', opacity: '0' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
               }
             }
@@ -73,84 +71,38 @@
       }
     </script>
     <style>
-      /* Nano Pattern Background */
       body {
         background-color: #f8fafc;
-        background-image: 
-          radial-gradient(#e2e8f0 1px, transparent 1px),
-          linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0));
-        background-size: 32px 32px, 100% 100%;
+        /* خلفية ناعمة جداً لا تشتت الانتباه */
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 40px 40px;
       }
       
-      /* Premium Scrollbar */
-      ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgba(226, 232, 240, 0.5);
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #94a3b8; 
-        border-radius: 99px;
-        border: 3px solid transparent;
-        background-clip: content-box;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; 
-        border: 3px solid transparent;
-        background-clip: content-box;
-      }
+      /* تحسين شريط التمرير */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       
-      /* Glossary Highlight Effect */
+      /* تأثير القاموس */
       .highlight-term {
-        border-bottom: 2px dashed #d97706;
+        border-bottom: 2px dotted #d97706;
         cursor: help;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 0 4px;
-        border-radius: 4px;
-        position: relative;
-        z-index: 1;
-      }
-      .highlight-term::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: #fffbeb;
-        border-radius: 4px;
-        z-index: -1;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s ease;
       }
       .highlight-term:hover {
+        background-color: #fef3c7;
         color: #92400e;
         border-bottom-style: solid;
       }
-      .highlight-term:hover::before {
-        transform: scaleX(1);
-      }
       
-      /* Security */
-      body {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-      input, textarea {
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        user-select: text;
-      }
+      /* منع التحديد للطلاب */
+      body { -webkit-user-select: none; user-select: none; }
+      input, textarea { -webkit-user-select: text; user-select: text; }
     </style>
     
     <script>
-      document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-      });
-      
+      // منع الزر الأيمن وأدوات المطور
+      document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
       document.addEventListener('keydown', function(e) {
         if(e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
           e.preventDefault();
@@ -161,11 +113,11 @@
 {
   "imports": {
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+    "vite": "https://aistudiocdn.com/vite@^7.2.4"
   }
 }
 </script>
