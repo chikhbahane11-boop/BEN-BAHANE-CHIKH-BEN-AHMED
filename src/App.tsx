@@ -116,7 +116,7 @@ function App() {
                 <h1 className="font-bold text-base leading-tight">المجتمع الدولي</h1>
                 <p className="text-xs text-legal-400 flex items-center gap-1">
                   مدخل وتطور تاريخي 
-                  <span className="text-[10px] opacity-50 font-mono border border-legal-600 px-1 rounded">v1.1</span>
+                  <span className="text-[10px] opacity-50 font-mono border border-legal-600 px-1 rounded bg-legal-800 text-gold-400">v1.2</span>
                 </p>
               </div>
             </div>
