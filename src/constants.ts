@@ -17,7 +17,7 @@ import { NavItem, SectionId, HistoryEvent, ComponentCard, ComparisonRow, GameIte
 export const HANDOUT_URL = "https://ufc.dz/wp-content/uploads/2025/06/%D9%85%D8%B7%D8%A8%D9%88%D8%B9%D8%A9-%D8%A7%D9%84%D9%85%D8%AC%D8%AA%D9%85%D8%B9-%D8%A7%D9%84%D8%AF%D9%88%D9%84%D9%8A-%D8%A7%D9%84%D8%AA%D8%B7%D9%88%D8%B1-%D9%88%D8%A7%D9%84%D8%A3%D8%B4%D8%AE%D8%A7%D8%B5-%D8%A7%D9%84%D8%A3%D8%B3%D8%AA%D8%A7%D8%B0-%D8%A5%D8%B3%D8%A7%D9%84%D9%85%D8%A9-%D9%85%D8%AD%D9%85%D8%AF-%D8%A3%D9%85%D9%8A%D9%86.pdf";
 
 // Updated Google Form URL for Student View (Direct Link)
-export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/1QddyRLlfbx3fT2OtDcMZL5qGgk9IUbgixPMGxK6VRv8/viewform";
+export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/1QddyRLlfbx3fT2OtDcMZL5qGgk9IUbgixPMGxK6VRv8/viewform?hl=ar";
 // Link for the teacher to view responses
 export const GOOGLE_FORM_RESPONSES_URL = "https://docs.google.com/forms/d/1QddyRLlfbx3fT2OtDcMZL5qGgk9IUbgixPMGxK6VRv8/edit#responses";
 
@@ -253,20 +253,17 @@ export const SUBJECTS_DEEP_DIVE: LockedQuestion[] = [
 ];
 
 export const CLASSIFICATION_GAME_ITEMS: GameItem[] = [
-  { name: 'تونس', type: 'state', feedback: 'دولة ذات سيادة.' },
-  { name: 'اليونسكو', type: 'org', feedback: 'منظمة تابعة للأمم المتحدة.' },
-  { name: 'منظمة التحرير', type: 'special', feedback: 'حركة تحرر وطني.' },
-  { name: 'كندا', type: 'state', feedback: 'دولة فيدرالية.' },
-  { name: 'الجامعة العربية', type: 'org', feedback: 'منظمة إقليمية.' },
-  { name: 'الفاتيكان', type: 'special', feedback: 'كيان ديني خاص.' },
+  { name: 'الجمهورية التونسية', type: 'state', feedback: 'صحيح! تونس دولة كاملة السيادة.' },
+  { name: 'منظمة اليونسكو', type: 'org', feedback: 'أحسنت! اليونسكو منظمة دولية تابعة للأمم المتحدة.' },
+  { name: 'منظمة التحرير الفلسطينية', type: 'special', feedback: 'دقيق، هي حركة تحرر وطني (كيان خاص).' },
+  { name: 'الكرسي الرسولي (الفاتيكان)', type: 'special', feedback: 'حالة فريدة! كيان ديني ذو سيادة روحية.' },
 ];
 
 export const MODERN_EXAMPLES: ModernExampleItem[] = [
-  { old: 'حلف قادش العسكري', new: 'الناتو (الدفاع المشترك)', period: '(الشرق القديم)' },
+  { old: 'حلف قادش العسكري', new: 'حلف الناتو (الدفاع المشترك)', period: '(الشرق القديم)' },
   { old: 'تحكيم المدن السومري', new: 'محكمة العدل الدولية', period: '(الشرق القديم)' },
-  { old: 'حصانة الرسل', new: 'اتفاقية فيينا للعلاقات الدبلوماسية', period: '(الشرق القديم)' },
-  { old: 'نظام القناصل', new: 'القانون التجاري الدولي', period: '(العصور الوسطى)' },
-  { old: 'مؤتمر وستفاليا', new: 'الجمعية العامة للأمم المتحدة', period: '(العصر الحديث)' },
+  { old: 'حصانة الرسل', new: 'اتفاقية فيينا للعلاقات الدبلوماسية 1961', period: '(الشرق القديم)' },
+  { old: 'نظام القناصل', new: 'منظمة التجارة العالمية (WTO)', period: '(العصور الوسطى)' },
 ];
 
 export const MODERN_ENRICHMENT: SectionEnrichment = {

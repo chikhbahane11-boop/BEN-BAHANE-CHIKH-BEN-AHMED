@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
@@ -784,18 +785,18 @@ export const SubjectsSection: React.FC = () => {
     const currentItem = CLASSIFICATION_GAME_ITEMS[gameIndex];
 
     return (
-      <div className="bg-orange-900 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-orange-500/50">
+      <div className="bg-orange-600 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-orange-400/50">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
         
         {!isFinished && currentItem ? (
           <div className="relative z-10">
-            <div className="flex justify-between text-orange-200 mb-10 text-sm font-mono tracking-wider">
+            <div className="flex justify-between text-orange-100 mb-10 text-sm font-mono tracking-wider">
               <span>Question {gameIndex + 1} / {CLASSIFICATION_GAME_ITEMS.length}</span>
-              <span className="text-orange-400">Score: {score}</span>
+              <span className="text-orange-200 font-bold">Score: {score}</span>
             </div>
             
             <div className="mb-12">
-               <h3 className="text-orange-200 mb-6 text-lg font-light">ما هو التصنيف القانوني لهذا الكيان؟</h3>
+               <h3 className="text-orange-100 mb-6 text-lg font-light">ما هو التصنيف القانوني لهذا الكيان؟</h3>
                <h2 className="text-5xl font-black mb-4 font-serif text-white drop-shadow-lg">{currentItem.name}</h2>
             </div>
             
@@ -805,20 +806,20 @@ export const SubjectsSection: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <button onClick={() => handleGameChoice('state')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">دولة <span className="block text-xs font-normal opacity-70 mt-1">شخص أصلي</span></button>
-                <button onClick={() => handleGameChoice('org')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">منظمة <span className="block text-xs font-normal opacity-70 mt-1">شخص وظيفي</span></button>
-                <button onClick={() => handleGameChoice('special')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/10 hover:shadow-glow hover:-translate-y-1">وضع خاص <span className="block text-xs font-normal opacity-70 mt-1">حالة استثنائية</span></button>
+                <button onClick={() => handleGameChoice('state')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">دولة <span className="block text-xs font-normal opacity-70 mt-1">شخص أصلي</span></button>
+                <button onClick={() => handleGameChoice('org')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">منظمة <span className="block text-xs font-normal opacity-70 mt-1">شخص وظيفي</span></button>
+                <button onClick={() => handleGameChoice('special')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">وضع خاص <span className="block text-xs font-normal opacity-70 mt-1">حالة استثنائية</span></button>
               </div>
             )}
           </div>
         ) : (
           <div className="py-10 animate-fade-in relative z-10">
-            <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-glow">
+            <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-glow border-4 border-white/20">
                 <Trophy size={48} className="text-white" />
             </div>
             <h2 className="text-4xl font-bold mb-4 font-serif">انتهى التحدي!</h2>
-            <p className="text-2xl mb-12 text-orange-200">نتيجتك النهائية: <span className="font-mono font-bold text-white text-3xl mx-2">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
-            <button onClick={resetGame} className="bg-white text-orange-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-100 transition-colors shadow-lg">العودة للدرس</button>
+            <p className="text-2xl mb-12 text-orange-100">نتيجتك النهائية: <span className="font-mono font-bold text-white text-3xl mx-2">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
+            <button onClick={resetGame} className="bg-white text-orange-700 px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg">العودة للدرس</button>
           </div>
         )}
       </div>
@@ -847,10 +848,10 @@ export const SubjectsSection: React.FC = () => {
       
       {/* Game Card Wrapper */}
       <div className="relative z-10">
-        <div className="bg-gradient-to-r from-orange-600 to-orange-800 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-soft relative overflow-hidden group">
-            <div className="absolute inset-0 bg-orange-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+        <div className="bg-gradient-to-r from-orange-500 to-orange-700 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-soft relative overflow-hidden group">
+            <div className="absolute inset-0 bg-orange-400 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
             <div className="relative z-10 mb-6 md:mb-0">
-            <h3 className="text-3xl font-bold mb-3 font-serif text-white">لعبة: خبير التصنيف الدولي</h3>
+            <h3 className="text-3xl font-bold mb-3 font-serif text-white">اختبر نفسك: من هم أشخاص القانون الدولي؟</h3>
             <p className="opacity-90 text-lg max-w-md leading-relaxed">تحدَّ نفسك واختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي في 60 ثانية.</p>
             </div>
             <button onClick={() => setMode('play')} className="bg-white text-orange-700 px-10 py-4 rounded-2xl font-bold hover:bg-orange-50 hover:scale-105 transition-all shadow-glow flex gap-3 items-center text-lg">
@@ -884,15 +885,15 @@ export const ModernConnectSection: React.FC = () => {
       </div>
 
       <div className="grid gap-6 mb-10">
-         {/* Using Green header style from the Python PDF */}
-         <div className="grid grid-cols-1 md:grid-cols-2 bg-green-800 text-white p-4 rounded-xl font-bold text-center mb-2 shadow-sm">
+         {/* Green header style */}
+         <div className="grid grid-cols-1 md:grid-cols-2 bg-green-700 text-white p-5 rounded-xl font-bold text-center mb-2 shadow-sm text-lg">
              <div>المبدأ القديم (الأصل التاريخي)</div>
              <div className="hidden md:block">التطبيق المعاصر (اليوم)</div>
          </div>
 
         {MODERN_EXAMPLES.map((item, i) => (
-          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-green-50 rounded-2xl border border-green-100 hover:border-green-300 hover:bg-white hover:shadow-md transition-all group">
-            <div className="flex flex-col sm:w-1/3">
+          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-green-50 rounded-2xl border border-green-100 hover:border-green-300 hover:bg-green-100 transition-all group shadow-sm hover:shadow-md">
+            <div className="flex flex-col sm:w-1/3 text-center sm:text-right">
               <span className="font-bold text-green-800 text-lg group-hover:text-green-900 transition-colors font-serif">
                 {/* Use safe text renderer */}
                 <GlossaryText text={item.old || ""} />
@@ -900,12 +901,12 @@ export const ModernConnectSection: React.FC = () => {
               <span className="text-[11px] text-green-600 font-bold uppercase tracking-wider mt-1">{item.period || ""}</span>
             </div>
             
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-green-200 text-green-300 my-4 sm:my-0 shadow-sm group-hover:border-green-400 group-hover:text-green-600 transition-colors">
-                <ArrowRight className="rotate-90 sm:rotate-180" size={20} />
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-green-200 text-green-500 my-4 sm:my-0 shadow-sm group-hover:border-green-400 group-hover:text-green-700 transition-colors group-hover:scale-110">
+                <ArrowRight className="rotate-90 sm:rotate-180" size={24} />
             </div>
             
             <div className="sm:w-1/2 text-left">
-              <span className="font-bold text-white bg-green-700 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg">
+              <span className="font-bold text-white bg-green-600 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg group-hover:bg-green-700 transition-colors">
                 {/* Use safe text renderer */}
                 <GlossaryText text={item.new || ""} />
               </span>
@@ -964,7 +965,7 @@ export const ReviewSection: React.FC = () => {
                       <button onClick={() => toggleReveal(idx)} className="flex-1 bg-gray-50 hover:bg-red-100 text-gray-600 hover:text-red-700 py-3 rounded-xl font-bold transition-all border border-gray-200 hover:border-red-300">خطأ</button>
                     </div>
                   ) : (
-                    <div className={`p-4 rounded-xl animate-fade-in border flex gap-4 ${item.isTrue ? 'bg-green-50 text-green-900 border-green-200' : 'bg-red-50 text-red-900 border-red-200'}`}>
+                    <div className={`p-4 rounded-xl animate-fade-in border flex gap-4 ${item.isTrue ? 'bg-green-100 text-green-900 border-green-200' : 'bg-red-50 text-red-900 border-red-200'}`}>
                       <div className="mt-1">
                          {item.isTrue ? <Check size={24}/> : <X size={24}/>}
                       </div>
