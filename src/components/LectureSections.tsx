@@ -25,7 +25,9 @@ import {
   FileText,
   ClipboardCheck,
   ExternalLink,
-  History
+  History,
+  MessageCircleQuestion,
+  GraduationCap
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, 
@@ -48,7 +50,8 @@ import {
   GOOGLE_FORM_URL,
   GOOGLE_FORM_RESPONSES_URL,
   SUMMARY_CARDS,
-  LEARNING_OBJECTIVES
+  LEARNING_OBJECTIVES,
+  STUDENT_QA_CONTENT
 } from '../constants';
 import { LockedQuestion } from '../types';
 
@@ -1023,6 +1026,57 @@ export const ReviewSection: React.FC = () => {
     </div>
   );
 };
+
+// --- Student QA Section ---
+export const StudentQASection: React.FC = () => {
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="bg-indigo-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden text-center">
+        <div className="absolute top-0 left-0 opacity-10">
+          <MessageCircleQuestion size={180} />
+        </div>
+        <div className="relative z-10">
+          <h2 className="text-3xl font-bold font-serif mb-4 flex items-center justify-center gap-3">
+             <MessageCircleQuestion size={40} className="text-indigo-300"/>
+             إجابات أسئلة الطلاب
+          </h2>
+          <p className="text-lg text-indigo-100 max-w-2xl mx-auto">
+            أسئلة جوهرية من "بطاقة الخروج" تظهر فهماً عميقاً ومتابعة دقيقة. إليكم التوضيحات الأكاديمية:
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-6">
+        {STUDENT_QA_CONTENT.map((item, idx) => (
+          <div key={idx} className="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow">
+             {/* Question Bubble */}
+             <div className="flex items-start gap-4 mb-4">
+               <div className="bg-gray-100 p-3 rounded-full shrink-0">
+                 <Users2 size={24} className="text-gray-600" />
+               </div>
+               <div className="bg-gray-50 rounded-2xl rounded-tr-none p-4 text-legal-800 font-bold text-lg w-full">
+                 {item.question}
+               </div>
+             </div>
+
+             {/* Answer Bubble */}
+             <div className="flex items-start gap-4 flex-row-reverse">
+                <div className="bg-indigo-100 p-3 rounded-full shrink-0">
+                  <GraduationCap size={24} className="text-indigo-700" />
+                </div>
+                <div className={`rounded-2xl rounded-tl-none p-5 text-legal-900 text-lg leading-loose font-medium w-full shadow-sm ${item.isComment ? 'bg-green-50 border border-green-200' : 'bg-indigo-50/50 border border-indigo-100'}`}>
+                   {item.isComment && <span className="text-green-600 font-bold block mb-1 text-sm">تعليق الأستاذ:</span>}
+                   <RichGlossaryText text={item.answer} />
+                </div>
+             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 // --- Summary Section ---
 export const SummarySection: React.FC = () => (

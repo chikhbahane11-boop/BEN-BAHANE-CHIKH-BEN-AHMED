@@ -1,3 +1,4 @@
+
 import { LucideIcon } from 'lucide-react';
 
 export enum SectionId {
@@ -8,6 +9,7 @@ export enum SectionId {
   MODERN = 'MODERN',
   REVIEW = 'REVIEW',
   SUMMARY = 'SUMMARY',
+  Q_AND_A = 'Q_AND_A',
   EXIT_TICKET = 'EXIT_TICKET'
 }
 
@@ -102,4 +104,10 @@ export interface SummaryCardData {
     items: string[];
     type: 'list' | 'timeline' | 'cards';
   }[];
+}
+
+export interface StudentQAItem {
+  question: string;
+  answer: string;
+  isComment?: boolean; // For encouraging comments
 }

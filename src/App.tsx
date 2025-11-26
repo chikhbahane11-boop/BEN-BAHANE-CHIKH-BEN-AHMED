@@ -19,7 +19,8 @@ import {
   ModernConnectSection, 
   ExitTicket,
   SummarySection,
-  ReviewSection
+  ReviewSection,
+  StudentQASection
 } from './components/LectureSections';
 
 const LECTURE_DURATION_MINUTES = 90;
@@ -71,6 +72,7 @@ function App() {
       case SectionId.MODERN: return <ModernConnectSection />;
       case SectionId.REVIEW: return <ReviewSection />;
       case SectionId.SUMMARY: return <SummarySection />;
+      case SectionId.Q_AND_A: return <StudentQASection />;
       case SectionId.EXIT_TICKET: return <ExitTicket />;
       default: return <IntroSection />;
     }
