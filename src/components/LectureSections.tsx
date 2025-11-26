@@ -740,34 +740,22 @@ export const SubjectsSection: React.FC = () => {
   const [lastFeedback, setLastFeedback] = useState<{msg: string, correct: boolean} | null>(null);
   const [isFinished, setIsFinished] = useState(false);
 
-  // CRITICAL FIX: Ensure game data exists
+  // Robust check: Ensure game items exist
   const hasGameItems = CLASSIFICATION_GAME_ITEMS && CLASSIFICATION_GAME_ITEMS.length > 0;
-
-  if (!hasGameItems) {
-    return <div className="p-10 text-center text-legal-500">جاري تحميل بيانات اللعبة...</div>;
-  }
+  const currentItem = hasGameItems ? CLASSIFICATION_GAME_ITEMS[gameIndex] : null;
 
   const handleGameChoice = (type: 'state' | 'org' | 'special') => {
-    // Safety check
-    if (gameIndex >= CLASSIFICATION_GAME_ITEMS.length) return;
-
-    const item = CLASSIFICATION_GAME_ITEMS[gameIndex];
-    const isCorrect = item.type === type;
+    if (!currentItem) return;
     
+    const isCorrect = currentItem.type === type;
     if (isCorrect) setScore(s => s + 1);
-    
-    setLastFeedback({ 
-      msg: isCorrect ? item.feedback : 'إجابة خاطئة! حاول التذكر.', 
-      correct: isCorrect 
-    });
+    setLastFeedback({ msg: isCorrect ? currentItem.feedback : 'خطأ! حاول التذكر.', correct: isCorrect });
     
     setTimeout(() => {
       if (gameIndex < CLASSIFICATION_GAME_ITEMS.length - 1) {
         setGameIndex(g => g + 1);
         setLastFeedback(null);
-      } else {
-        setIsFinished(true);
-      }
+      } else setIsFinished(true);
     }, 1500);
   };
 
@@ -779,64 +767,50 @@ export const SubjectsSection: React.FC = () => {
     setMode('learn');
   };
 
-  // RENDER GAME MODE
-  if (mode === 'play') {
-    // Safety guard for rendering current item
-    const currentItem = CLASSIFICATION_GAME_ITEMS[gameIndex];
-
-    return (
-      <div className="bg-orange-600 rounded-3xl shadow-2xl p-8 sm:p-12 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-orange-400/50">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-        
-        {!isFinished && currentItem ? (
-          <div className="relative z-10">
-            <div className="flex justify-between text-orange-100 mb-10 text-sm font-mono tracking-wider">
-              <span>Question {gameIndex + 1} / {CLASSIFICATION_GAME_ITEMS.length}</span>
-              <span className="text-orange-200 font-bold">Score: {score}</span>
-            </div>
-            
-            <div className="mb-12">
-               <h3 className="text-orange-100 mb-6 text-lg font-light">ما هو التصنيف القانوني لهذا الكيان؟</h3>
-               <h2 className="text-5xl font-black mb-4 font-serif text-white drop-shadow-lg">{currentItem.name}</h2>
-            </div>
-            
-            {lastFeedback ? (
-              <div className={`p-8 rounded-2xl text-2xl font-bold animate-bounce-in shadow-xl ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                {lastFeedback.msg}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <button onClick={() => handleGameChoice('state')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">دولة <span className="block text-xs font-normal opacity-70 mt-1">شخص أصلي</span></button>
-                <button onClick={() => handleGameChoice('org')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">منظمة <span className="block text-xs font-normal opacity-70 mt-1">شخص وظيفي</span></button>
-                <button onClick={() => handleGameChoice('special')} className="p-6 bg-white/10 hover:bg-orange-500 hover:text-white rounded-2xl font-bold text-lg transition-all border border-white/20 hover:shadow-glow hover:-translate-y-1">وضع خاص <span className="block text-xs font-normal opacity-70 mt-1">حالة استثنائية</span></button>
-              </div>
-            )}
+  if (mode === 'play' && hasGameItems) return (
+    <div className="bg-orange-500 rounded-2xl shadow-xl p-8 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-orange-300">
+      {!isFinished ? (
+        <>
+          <div className="flex justify-between text-orange-100 mb-8 text-sm font-mono font-bold">
+            <span>السؤال {gameIndex + 1}/{CLASSIFICATION_GAME_ITEMS.length}</span>
+            <span>النتيجة: {score}</span>
           </div>
-        ) : (
-          <div className="py-10 animate-fade-in relative z-10">
-            <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-glow border-4 border-white/20">
-                <Trophy size={48} className="text-white" />
+          <h3 className="text-orange-100 mb-4 font-bold text-lg">ما هو التصنيف القانوني لهذا الكيان؟</h3>
+          <h2 className="text-4xl font-black mb-12 font-serif">{currentItem?.name}</h2>
+          
+          {lastFeedback ? (
+            <div className={`p-6 rounded-xl text-xl font-bold animate-bounce-in shadow-lg ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+              {lastFeedback.msg}
             </div>
-            <h2 className="text-4xl font-bold mb-4 font-serif">انتهى التحدي!</h2>
-            <p className="text-2xl mb-12 text-orange-100">نتيجتك النهائية: <span className="font-mono font-bold text-white text-3xl mx-2">{score}</span> من {CLASSIFICATION_GAME_ITEMS.length}</p>
-            <button onClick={resetGame} className="bg-white text-orange-700 px-10 py-4 rounded-full font-bold text-lg hover:bg-orange-50 transition-colors shadow-lg">العودة للدرس</button>
-          </div>
-        )}
-      </div>
-    );
-  }
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <button onClick={() => handleGameChoice('state')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">دولة (شخص أصلي)</button>
+              <button onClick={() => handleGameChoice('org')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">منظمة (شخص وظيفي)</button>
+              <button onClick={() => handleGameChoice('special')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">وضع خاص</button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="py-8 animate-fade-in">
+          <Trophy size={80} className="text-yellow-300 mx-auto mb-6 drop-shadow-md" />
+          <h2 className="text-3xl font-bold mb-4 font-serif">انتهت اللعبة!</h2>
+          <p className="text-xl mb-8 font-bold">نتيجتك: {score} / {CLASSIFICATION_GAME_ITEMS.length}</p>
+          <button onClick={resetGame} className="bg-white text-orange-600 px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg">العودة للدرس</button>
+        </div>
+      )}
+    </div>
+  );
 
-  // RENDER LEARN MODE
   return (
     <div className="space-y-10">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {SUBJECTS_DATA.map((subj, idx) => (
-          <div key={idx} className="bg-white rounded-2xl shadow-card p-8 border-t-4 border-legal-600 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 group">
-            <div className="bg-legal-50 w-16 h-16 rounded-2xl flex items-center justify-center text-legal-800 mb-6 group-hover:bg-legal-900 group-hover:text-gold-500 transition-colors">
-              {idx === 0 ? <Building2 size={32} /> : idx === 1 ? <Users2 size={32} /> : <ShieldCheck size={32} />}
+          <div key={idx} className="bg-white rounded-xl shadow-sm p-8 border-t-8 border-legal-600 hover:-translate-y-2 transition-transform duration-300">
+            <div className="bg-legal-50 w-14 h-14 rounded-full flex items-center justify-center text-legal-800 mb-6 shadow-inner">
+              {idx === 0 ? <Building2 size={28} /> : idx === 1 ? <Users2 size={28} /> : <ShieldCheck size={28} />}
             </div>
             <h3 className="text-xl font-bold text-legal-900 mb-3 font-serif"><GlossaryText text={subj.type} /></h3>
-            <p className="text-sm text-legal-600 mb-6 h-16 leading-relaxed font-medium"><GlossaryText text={subj.desc} /></p>
+            <p className="text-base text-legal-600 mb-6 min-h-[3rem] leading-relaxed"><GlossaryText text={subj.desc} /></p>
             <div className="flex flex-wrap gap-2">
               {subj.elements.map((el, i) => <span key={i} className="text-xs border border-legal-200 px-3 py-1.5 rounded-full bg-legal-50 text-legal-600 font-bold">{el}</span>)}
             </div>
@@ -846,18 +820,27 @@ export const SubjectsSection: React.FC = () => {
       
       <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
       
-      {/* Game Card Wrapper */}
-      <div className="relative z-10">
-        <div className="bg-gradient-to-r from-orange-500 to-orange-700 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-soft relative overflow-hidden group">
-            <div className="absolute inset-0 bg-orange-400 opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
-            <div className="relative z-10 mb-6 md:mb-0">
-            <h3 className="text-3xl font-bold mb-3 font-serif text-white">اختبر نفسك: من هم أشخاص القانون الدولي؟</h3>
-            <p className="opacity-90 text-lg max-w-md leading-relaxed">تحدَّ نفسك واختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي في 60 ثانية.</p>
-            </div>
-            <button onClick={() => setMode('play')} className="bg-white text-orange-700 px-10 py-4 rounded-2xl font-bold hover:bg-orange-50 hover:scale-105 transition-all shadow-glow flex gap-3 items-center text-lg">
-            <Play size={24} fill="currentColor" /> ابدأ التحدي
-            </button>
+      {/* Game Banner - Fixed Clickability with z-index and relative layout */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative z-10 overflow-hidden group border border-orange-400">
+        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+        <div className="mb-6 md:mb-0 text-center md:text-right relative z-10">
+          <h3 className="text-3xl font-bold mb-2 font-serif flex items-center gap-2 justify-center md:justify-start">
+            <Trophy className="text-yellow-300" />
+            لعبة: خبير التصنيف الدولي
+          </h3>
+          <p className="opacity-90 text-lg font-medium text-orange-100">اختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي.</p>
         </div>
+        <button 
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMode('play');
+            }} 
+            className="relative z-20 bg-white text-orange-600 px-10 py-4 rounded-full font-bold hover:bg-gray-50 transition-all shadow-lg flex gap-3 items-center hover:scale-105 active:scale-95 cursor-pointer ring-4 ring-orange-400/50"
+        >
+          <Play size={24} fill="currentColor" /> 
+          <span className="text-lg">ابدأ التحدي</span>
+        </button>
       </div>
 
       <TeacherLockedPanel questions={SUBJECTS_DEEP_DIVE} />
@@ -865,114 +848,118 @@ export const SubjectsSection: React.FC = () => {
   );
 };
 
-// --- Modern Section (ROBUST VERSION) ---
+// --- Modern Section ---
 export const ModernConnectSection: React.FC = () => {
-  // Safety check for modern examples
-  if (!MODERN_EXAMPLES || MODERN_EXAMPLES.length === 0) {
-    return <div className="p-10 text-center text-legal-500">جاري تحميل المحتوى...</div>;
-  }
+  if (!MODERN_EXAMPLES) return null;
 
   return (
-    <div className="bg-white rounded-3xl shadow-soft p-10 border border-legal-100">
-      <div className="flex items-center gap-4 mb-10 pb-6 border-b border-legal-100">
-          <div className="bg-green-100 p-3 rounded-xl text-green-700">
-              <Globe size={32} />
-          </div>
-          <div>
-              <h3 className="text-3xl font-bold text-legal-900 font-serif">ربط الماضي بالحاضر</h3>
-              <p className="text-legal-500 text-sm mt-1">كيف تحولت مبادئ الأجداد إلى قوانين الأحفاد؟</p>
-          </div>
-      </div>
+    <div className="bg-white rounded-2xl shadow-soft p-10 border border-legal-100">
+        <h3 className="text-3xl font-bold text-green-900 mb-8 flex items-center gap-3 font-serif border-b border-green-100 pb-4">
+        <div className="bg-green-100 p-2 rounded-lg text-green-600">
+            <Globe size={28} />
+        </div>
+        ربط الماضي بالحاضر
+        </h3>
+        
+        {/* Responsive Table Layout */}
+        <div className="overflow-hidden rounded-xl border border-green-200 bg-green-50/30">
+        <table className="w-full text-right border-collapse">
+            <thead className="bg-green-100/50">
+            <tr>
+                <th className="p-5 text-green-800 font-bold w-1/2 text-lg font-serif border-b border-green-200">المبدأ القديم (الأصل التاريخي)</th>
+                <th className="p-5 text-green-900 font-bold w-1/2 text-lg font-serif border-b border-green-200 bg-green-200/20">التطبيق المعاصر (اليوم)</th>
+            </tr>
+            </thead>
+            <tbody className="divide-y divide-green-100">
+            {MODERN_EXAMPLES.map((item, i) => (
+                <tr key={i} className="group hover:bg-green-50 transition-colors">
+                <td className="p-5 border-l border-green-100">
+                    <div className="font-bold text-green-700 text-lg mb-1 flex items-center gap-2">
+                        <History size={16} className="opacity-50"/>
+                        {item.old}
+                    </div>
+                    <span className="text-xs font-bold text-green-500 bg-green-100 px-2 py-1 rounded inline-block">{item.period}</span>
+                </td>
+                <td className="p-5 bg-white/50 group-hover:bg-white/80 transition-colors">
+                    <div className="font-bold text-green-900 text-lg flex items-center gap-2">
+                        <ArrowRight size={18} className="text-green-400 rotate-180"/>
+                        <GlossaryText text={item.new} />
+                    </div>
+                </td>
+                </tr>
+            ))}
+            </tbody>
+        </table>
+        </div>
 
-      <div className="grid gap-6 mb-10">
-         {/* Green header style */}
-         <div className="grid grid-cols-1 md:grid-cols-2 bg-green-700 text-white p-5 rounded-xl font-bold text-center mb-2 shadow-sm text-lg">
-             <div>المبدأ القديم (الأصل التاريخي)</div>
-             <div className="hidden md:block">التطبيق المعاصر (اليوم)</div>
-         </div>
-
-        {MODERN_EXAMPLES.map((item, i) => (
-          <div key={i} className="flex flex-col sm:flex-row items-center justify-between p-6 bg-green-50 rounded-2xl border border-green-100 hover:border-green-300 hover:bg-green-100 transition-all group shadow-sm hover:shadow-md">
-            <div className="flex flex-col sm:w-1/3 text-center sm:text-right">
-              <span className="font-bold text-green-800 text-lg group-hover:text-green-900 transition-colors font-serif">
-                {/* Use safe text renderer */}
-                <GlossaryText text={item.old || ""} />
-              </span>
-              <span className="text-[11px] text-green-600 font-bold uppercase tracking-wider mt-1">{item.period || ""}</span>
-            </div>
-            
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-green-200 text-green-500 my-4 sm:my-0 shadow-sm group-hover:border-green-400 group-hover:text-green-700 transition-colors group-hover:scale-110">
-                <ArrowRight className="rotate-90 sm:rotate-180" size={24} />
-            </div>
-            
-            <div className="sm:w-1/2 text-left">
-              <span className="font-bold text-white bg-green-600 px-6 py-3 rounded-xl shadow-sm inline-block w-full sm:w-auto text-center text-lg group-hover:bg-green-700 transition-colors">
-                {/* Use safe text renderer */}
-                <GlossaryText text={item.new || ""} />
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-      <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
-      <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
+        <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
+        <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
     </div>
   );
 };
 
-// --- Review Section ---
+// --- Review Section (NEW) ---
 export const ReviewSection: React.FC = () => {
   const [revealedTF, setRevealedTF] = useState<number[]>([]);
   const [revealedNotes, setRevealedNotes] = useState<number[]>([]);
+
+  // Locking state for Teacher Notes
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [pendingNoteIdx, setPendingNoteIdx] = useState<number | null>(null);
 
   const toggleReveal = (idx: number) => {
     setRevealedTF(prev => prev.includes(idx) ? prev : [...prev, idx]);
   };
 
   const handleNoteUnlockRequest = (idx: number) => {
+    // Direct Unlock
     if (revealedNotes.includes(idx)) return;
     setRevealedNotes(prev => [...prev, idx]);
   };
 
+  const closeModal = () => {
+    setShowPasswordModal(false);
+    setPasswordInput('');
+    setPendingNoteIdx(null);
+  };
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-700 to-blue-900 text-white p-10 rounded-3xl shadow-soft mb-8 text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10"></div>
-        <h2 className="text-4xl font-bold mb-3 flex justify-center items-center gap-4 font-serif relative z-10">
-          <MessageCircle size={36} className="text-blue-300" />
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-lg mb-8 text-center">
+        <h2 className="text-3xl font-bold mb-2 flex justify-center items-center gap-3 font-serif">
+          <MessageCircle size={32} />
           المراجعة والنقاش المفتوح
         </h2>
-        <p className="opacity-80 text-xl font-light relative z-10">محطة لترسيخ المفاهيم وتبادل الآراء قبل الختام</p>
+        <p className="opacity-90 text-lg font-medium">محطة لترسيخ المفاهيم وتبادل الآراء قبل الختام</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* True / False Activity */}
-        <div className="bg-white p-8 rounded-3xl shadow-card border border-legal-100 flex flex-col h-full">
-          <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-3 text-2xl font-serif border-b border-legal-100 pb-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-legal-200">
+          <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-2 text-2xl font-serif">
             <CheckCircle2 className="text-green-500" size={28} />
             صواب أم خطأ؟
           </h3>
-          <div className="space-y-6 flex-1">
+          <div className="space-y-6">
             {REVIEW_CONTENT.trueFalse.map((item, idx) => {
               const isRevealed = revealedTF.includes(idx);
               return (
-                <div key={idx} className="border-b border-legal-50 pb-6 last:border-0 last:pb-0">
-                  <p className="font-medium text-legal-800 mb-4 text-lg leading-snug">{item.statement}</p>
+                <div key={idx} className="border-b border-legal-100 pb-6 last:border-0 last:pb-0">
+                  <p className="font-bold text-legal-800 mb-4 text-lg leading-relaxed">{item.statement}</p>
                   {!isRevealed ? (
                     <div className="flex gap-4">
-                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-gray-50 hover:bg-green-100 text-gray-600 hover:text-green-700 py-3 rounded-xl font-bold transition-all border border-gray-200 hover:border-green-300">صواب</button>
-                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-gray-50 hover:bg-red-100 text-gray-600 hover:text-red-700 py-3 rounded-xl font-bold transition-all border border-gray-200 hover:border-red-300">خطأ</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-green-100 text-legal-600 hover:text-green-700 py-3 rounded-xl font-bold transition-colors border-2 border-legal-100 hover:border-green-200">صواب</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-red-100 text-legal-600 hover:text-red-700 py-3 rounded-xl font-bold transition-colors border-2 border-legal-100 hover:border-red-200">خطأ</button>
                     </div>
                   ) : (
-                    <div className={`p-4 rounded-xl animate-fade-in border flex gap-4 ${item.isTrue ? 'bg-green-100 text-green-900 border-green-200' : 'bg-red-50 text-red-900 border-red-200'}`}>
-                      <div className="mt-1">
-                         {item.isTrue ? <Check size={24}/> : <X size={24}/>}
+                    <div className={`p-4 rounded-xl animate-slide-up border ${item.isTrue ? 'bg-green-50 text-green-900 border-green-200' : 'bg-red-50 text-red-900 border-red-200'}`}>
+                      <div className="flex items-center gap-2 font-black mb-2 text-lg">
+                        {item.isTrue ? <Check size={24}/> : <X size={24}/>}
+                        {item.isTrue ? 'إجابة صحيحة' : 'خطأ'}
                       </div>
-                      <div>
-                          <div className="font-bold text-base mb-1">{item.isTrue ? 'إجابة صحيحة' : 'إجابة خاطئة'}</div>
-                          <p className="text-sm opacity-90">{item.correction}</p>
-                      </div>
+                      <p className="text-base font-medium">{item.correction}</p>
                     </div>
                   )}
                 </div>
@@ -982,43 +969,44 @@ export const ReviewSection: React.FC = () => {
         </div>
 
         {/* Open Discussion Topics */}
-        <div className="bg-white p-8 rounded-3xl shadow-card border border-legal-100 flex flex-col h-full">
-           <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-3 text-2xl font-serif border-b border-legal-100 pb-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-legal-200">
+           <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-2 text-2xl font-serif">
             <Users2 className="text-blue-500" size={28} />
             محاور للنقاش الجماعي
           </h3>
-          <div className="space-y-8 flex-1">
+          <div className="space-y-8">
              {REVIEW_CONTENT.topics.map((topic, idx) => {
                const isNoteRevealed = revealedNotes.includes(idx);
                return (
-                 <div key={idx} className="bg-legal-50 p-6 rounded-2xl border-l-4 border-gold-500 hover:bg-white hover:shadow-md transition-all">
-                   <h4 className="font-bold text-legal-900 text-xl mb-4 font-serif">{topic.title}</h4>
+                 <div key={idx} className="bg-blue-50/50 p-6 rounded-2xl border-l-4 border-gold-500 hover:shadow-md transition-shadow">
+                   <h4 className="font-bold text-blue-900 text-xl mb-4 font-serif">{topic.title}</h4>
                    <ul className="space-y-3 mb-6">
                      {topic.points.map((point, pIdx) => (
-                       <li key={pIdx} className="flex items-center gap-3 text-legal-700">
-                         <div className="w-1.5 h-1.5 bg-legal-400 rounded-full shrink-0" />
-                         <span className="text-base">{point}</span>
+                       <li key={pIdx} className="flex items-start gap-3 text-legal-700 font-medium">
+                         <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 shrink-0"></div>
+                         <span className="leading-relaxed">{point}</span>
                        </li>
                      ))}
                    </ul>
                    
                    {/* Teacher Notes Reveal */}
                    {topic.teacherNotes && (
-                     <div className="mt-4 pt-4 border-t border-legal-200/50">
+                     <div className="mt-4 pt-4 border-t border-blue-100">
                        {!isNoteRevealed ? (
                          <button 
                            onClick={() => handleNoteUnlockRequest(idx)}
-                           className="text-xs flex items-center gap-2 text-legal-500 hover:text-gold-600 font-bold transition-colors bg-white px-3 py-1.5 rounded-full border border-legal-200 shadow-sm"
+                           className="w-full py-2 rounded-lg border border-blue-200 text-blue-500 hover:text-blue-700 hover:bg-blue-100 font-bold transition-colors text-sm flex items-center justify-center gap-2"
                          >
-                           <Unlock size={12} /> كشف التوجيه الأكاديمي (مفتوح)
+                           <Lightbulb size={16} /> كشف التوجيه الأكاديمي
                          </button>
                        ) : (
-                         <div className="bg-gold-50/50 p-4 rounded-xl border border-gold-100 shadow-sm animate-fade-in">
-                           <h5 className="text-xs font-bold text-gold-700 mb-2 flex items-center gap-1 uppercase tracking-wider">
-                             <Lightbulb size={14} />
-                             توجيه أكاديمي
+                         <div className="bg-white p-5 rounded-xl border border-gold-200 shadow-sm animate-fade-in relative overflow-hidden">
+                           <div className="absolute top-0 right-0 w-1 bg-gold-400 h-full"></div>
+                           <h5 className="text-sm font-bold text-gold-600 mb-2 flex items-center gap-2 uppercase tracking-wider">
+                             <Lightbulb size={16} />
+                             توجيه الأستاذ:
                            </h5>
-                           <p className="text-base text-legal-800 leading-relaxed font-serif">{topic.teacherNotes}</p>
+                           <p className="text-base text-legal-800 leading-loose font-medium whitespace-pre-line">{topic.teacherNotes}</p>
                          </div>
                        )}
                      </div>
@@ -1027,7 +1015,7 @@ export const ReviewSection: React.FC = () => {
                );
              })}
           </div>
-          <div className="mt-8 p-4 bg-blue-50 text-blue-800 rounded-xl text-sm text-center font-bold">
+          <div className="mt-8 p-4 bg-gray-50 text-gray-600 rounded-xl text-sm text-center font-medium border border-gray-200 border-dashed">
              يفتح الأستاذ المجال للمداخلات والآراء حول هذه القضايا المعاصرة.
           </div>
         </div>
@@ -1038,174 +1026,124 @@ export const ReviewSection: React.FC = () => {
 
 // --- Summary Section ---
 export const SummarySection: React.FC = () => (
-  <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-xl border border-legal-200 overflow-hidden print:shadow-none print:border-none">
-    <div className="bg-legal-900 text-white p-10 flex items-center justify-between relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-      <div className="relative z-10">
-          <h2 className="text-3xl font-bold flex items-center gap-4 font-serif">
-            <Book className="text-gold-500" size={32} />
-            الملخص النظري الشامل
-          </h2>
-          <p className="text-legal-400 mt-2 text-sm pr-12">خلاصة المحاضرة للمراجعة والحفظ</p>
-      </div>
-      <button className="relative z-10 text-sm bg-white/10 hover:bg-white text-white hover:text-legal-900 px-6 py-3 rounded-xl font-bold transition-colors flex items-center gap-2" onClick={() => window.print()}>
-          <FileText size={16} /> طباعة
-      </button>
-    </div>
-    
-    <div className="p-10 bg-gray-50/50 grid gap-10">
-      {SUMMARY_CARDS.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div key={card.id} className="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100 group hover:border-legal-300 transition-colors">
-            <div className={`bg-gradient-to-r ${card.colorClass} p-5 text-white flex items-center gap-4`}>
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                  <Icon size={24} />
-              </div>
-              <h3 className="text-xl font-bold font-serif">{card.title}</h3>
+    <div className="space-y-8">
+        <div className="bg-legal-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden mb-8">
+            <div className="absolute top-0 right-0 opacity-10 rotate-12 transform translate-x-20 -translate-y-10">
+                <Book size={200} />
             </div>
-            <div className="p-8 space-y-8">
-              {card.content.map((section, idx) => (
-                <div key={idx}>
-                  {section.subtitle && <h4 className="font-bold text-legal-800 mb-4 border-b-2 border-legal-100 pb-2 inline-block text-lg font-serif">{section.subtitle}</h4>}
-                  
-                  {section.type === 'timeline' ? (
-                    <div className="space-y-6 border-r-[3px] border-legal-100 pr-6 mr-2">
-                      {section.items.map((item, i) => {
-                        const [title, desc] = item.split(':');
-                        return (
-                          <div key={i} className="relative">
-                            <div className="absolute top-2 -right-[31px] w-4 h-4 rounded-full bg-white border-[3px] border-legal-300 shadow-sm" />
-                            <p className="text-base text-legal-600 leading-loose">
-                              <strong className="text-legal-900 block text-lg mb-1">{title}</strong> {desc}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : section.type === 'cards' ? (
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       {section.items.map((item, i) => (
-                         <div key={i} className="bg-legal-50 hover:bg-white hover:shadow-md p-5 rounded-xl text-base text-legal-700 leading-relaxed border border-legal-100 transition-all">
-                           {item}
-                         </div>
-                       ))}
-                     </div>
-                  ) : (
-                    <ul className="space-y-3">
-                      {section.items.map((item, i) => (
-                        <li key={i} className="flex items-start gap-3 text-base text-legal-700 leading-loose group/item hover:bg-legal-50 p-2 rounded-lg transition-colors">
-                           <div className="w-2 h-2 bg-gold-500 rounded-full mt-2.5 shrink-0 group-hover/item:scale-125 transition-transform" />
-                           <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+            <div className="relative z-10 text-center">
+                <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4 flex items-center justify-center gap-4">
+                    <FileText className="text-gold-500" size={40} />
+                    الملخص النظري الشامل
+                </h2>
+                <p className="text-lg text-legal-300 max-w-2xl mx-auto">خلاصة مركزة لأهم محاور المحاضرة، صممت لتكون مرجعك السريع للمراجعة.</p>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
-
-// --- Exit Ticket (Teacher Protected) ---
-export const ExitTicket: React.FC = () => {
-  const [view, setView] = useState<'student' | 'teacherAuth' | 'teacherView'>('student');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleTeacherLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === 'omar2016') {
-      setView('teacherView');
-      setError('');
-    } else {
-      setError('كلمة المرور غير صحيحة');
-    }
-  };
-
-  if (view === 'teacherAuth') {
-    return (
-      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-soft p-10 text-center border border-legal-100 mt-10">
-        <div className="w-16 h-16 bg-legal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="text-legal-600" size={32} />
         </div>
-        <h2 className="text-2xl font-bold mb-6 font-serif">دخول الأستاذ</h2>
-        <form onSubmit={handleTeacherLogin}>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="أدخل الرمز السري"
-            className="w-full p-4 border rounded-xl mb-6 text-center font-mono text-lg focus:ring-2 focus:ring-legal-500 focus:border-legal-500 outline-none"
-            autoFocus
-          />
-          {error && <p className="text-red-500 text-sm mb-4 font-bold bg-red-50 p-2 rounded-lg">{error}</p>}
-          <div className="flex gap-3">
-            <button type="submit" className="flex-1 bg-legal-900 hover:bg-legal-800 text-white py-3 rounded-xl font-bold transition-colors">دخول</button>
-            <button type="button" onClick={() => setView('student')} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition-colors">عودة</button>
-          </div>
-        </form>
-      </div>
-    );
-  }
 
-  if (view === 'teacherView') {
-    return (
-      <div className="bg-white rounded-3xl shadow-soft p-10 max-w-3xl mx-auto text-center border border-legal-100 mt-10">
-        <div className="flex justify-between items-center mb-10 border-b border-legal-100 pb-6">
-          <h2 className="text-3xl font-bold flex items-center gap-3 font-serif"><Unlock className="text-green-500" /> لوحة تحكم الأستاذ</h2>
-          <button onClick={() => { setView('student'); setPassword(''); }} className="text-sm bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors">تسجيل خروج</button>
+        <div className="grid grid-cols-1 gap-8">
+            {SUMMARY_CARDS.map((card) => (
+                <div key={card.id} className="bg-white rounded-2xl shadow-soft overflow-hidden border border-legal-100 hover:shadow-lg transition-shadow">
+                    <div className={`bg-gradient-to-r ${card.colorClass} p-4 flex items-center gap-4 text-white`}>
+                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                            <card.icon size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold font-serif">{card.title}</h3>
+                    </div>
+                    
+                    <div className="p-8 space-y-8">
+                        {card.content.map((section, idx) => (
+                            <div key={idx} className="last:mb-0">
+                                {section.subtitle && (
+                                    <h4 className="text-lg font-bold text-legal-900 mb-4 pb-2 border-b border-legal-100 flex items-center gap-2">
+                                        <span className="w-1.5 h-6 bg-gold-500 rounded-full"></span>
+                                        {section.subtitle}
+                                    </h4>
+                                )}
+                                
+                                {section.type === 'timeline' ? (
+                                    <div className="space-y-4 relative before:absolute before:top-2 before:right-[7px] before:w-0.5 before:h-full before:bg-legal-200 mr-2">
+                                        {section.items.map((item, i) => (
+                                            <div key={i} className="relative pr-8">
+                                                <div className="absolute top-2 right-0 w-4 h-4 rounded-full bg-white border-4 border-legal-400"></div>
+                                                <RichGlossaryText text={item} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : section.type === 'cards' ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {section.items.map((item, i) => (
+                                            <div key={i} className="bg-legal-50 p-4 rounded-xl border border-legal-100 text-legal-800 leading-relaxed font-medium hover:bg-white hover:shadow-md transition-all">
+                                                <RichGlossaryText text={item} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <ul className="space-y-3">
+                                        {section.items.map((item, i) => (
+                                            <li key={i} className="flex items-start gap-3">
+                                                <CheckCircle2 size={18} className="text-green-500 mt-1.5 shrink-0" />
+                                                <span className="text-legal-700 leading-loose text-lg font-medium"><RichGlossaryText text={item} /></span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
         </div>
         
-        <div className="py-12 bg-legal-50/50 rounded-2xl border border-legal-200 border-dashed">
-          <p className="text-xl text-legal-600 mb-8 font-medium">اضغط أدناه لمشاهدة ردود الطلاب الحقيقية في Google Forms</p>
-          <a 
-            href={GOOGLE_FORM_RESPONSES_URL} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-4 bg-green-600 text-white px-10 py-5 rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-green-500/30 hover:-translate-y-1"
-          >
-            <FileText size={28} />
-            <span className="text-lg">فتح صفحة الردود (Excel)</span>
-          </a>
+        <div className="flex justify-center mt-12">
+             <button 
+                onClick={() => window.print()} 
+                className="bg-legal-800 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-legal-700 transition-colors flex items-center gap-2 print:hidden"
+             >
+                <FileText size={20} /> طباعة الملخص
+             </button>
         </div>
-      </div>
-    );
-  }
+    </div>
+);
 
-  // Student View
+// --- Exit Ticket (Google Form Integration) ---
+export const ExitTicket: React.FC = () => {
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-soft p-10 border-t-8 border-legal-800 relative text-center mt-10">
-      <div className="mb-10">
-        <div className="w-24 h-24 bg-legal-50 text-legal-900 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <ClipboardCheck size={48} className="text-legal-800" />
-        </div>
-        <h2 className="text-4xl font-bold text-legal-900 font-serif mb-4">بطاقة الخروج</h2>
-        <p className="text-legal-500 text-xl font-light">شاركنا ما تعلمته اليوم واترك بصمتك!</p>
-      </div>
-      
-      <div className="py-8 px-4">
-        <a 
-            href={GOOGLE_FORM_URL} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="w-full py-6 bg-legal-900 hover:bg-legal-800 text-white text-2xl font-bold rounded-2xl transition-all shadow-xl shadow-legal-900/20 flex items-center justify-center gap-4 hover:scale-[1.02] transform duration-200 group"
-        >
-            <span>اضغط هنا لملء الاستمارة</span>
-            <ExternalLink size={28} className="text-gold-500 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-        </a>
-        <p className="text-sm text-legal-400 mt-6 font-medium bg-legal-50 inline-block px-4 py-2 rounded-full">سيفتح النموذج في نافذة جديدة</p>
-      </div>
-      
-      <div className="mt-16 pt-8 border-t border-legal-100 flex justify-center">
-        <button onClick={() => setView('teacherAuth')} className="text-xs text-legal-300 hover:text-legal-600 p-2 flex items-center gap-2 transition-colors font-bold uppercase tracking-widest">
-           <Lock size={12} /> Teacher Access
-        </button>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-8 text-center h-full flex flex-col justify-center">
+       <div className="bg-white p-10 rounded-3xl shadow-2xl border-t-8 border-legal-900 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-32 h-32 bg-legal-50 rounded-br-full -z-0"></div>
+          
+          <div className="mb-8 relative z-10">
+            <div className="w-20 h-20 bg-legal-100 text-legal-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+               <ClipboardCheck size={40} />
+            </div>
+            <h2 className="text-3xl font-bold text-legal-900 font-serif mb-2">بطاقة الخروج</h2>
+            <p className="text-legal-500 text-lg">تذكر: لا تخرج قبل أن تترك أثراً! رأيك يهمنا لتطوير المحاضرة.</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+             <a 
+               href={GOOGLE_FORM_URL} 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="bg-legal-900 hover:bg-gold-500 hover:text-legal-900 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-3 group"
+             >
+               <span>ملء الاستمارة الآن</span>
+               <ExternalLink size={24} className="group-hover:rotate-45 transition-transform"/>
+             </a>
+             
+             <a 
+                href={GOOGLE_FORM_RESPONSES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white border-2 border-legal-200 text-legal-600 px-8 py-5 rounded-2xl font-bold text-lg hover:bg-legal-50 transition-colors flex items-center justify-center gap-2"
+             >
+                <Lock size={18} />
+                دخول الأستاذ (الردود)
+             </a>
+          </div>
+          
+          <p className="mt-8 text-sm text-gray-400 font-medium">سيتم فتح الاستمارة في نافذة جديدة آمنة عبر Google Forms</p>
+       </div>
     </div>
   );
 };
