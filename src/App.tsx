@@ -3,14 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Menu, 
   X, 
-  Clock, 
   ChevronRight, 
   GraduationCap, 
   ChevronLeft,
   Download
 } from 'lucide-react';
-import { NAV_ITEMS, HANDOUT_URL } from './constants';
-import { SectionId, NavItem } from './types';
+import { NAV_ITEMS, HANDOUT_URL, LECTURE_DURATION_MINUTES } from './constants';
+import { SectionId } from './types';
 import { 
   IntroSection, 
   ComponentsSection, 
@@ -19,11 +18,8 @@ import {
   ModernConnectSection, 
   ExitTicket,
   SummarySection,
-  ReviewSection,
-  StudentQASection
+  ReviewSection
 } from './components/LectureSections';
-
-const LECTURE_DURATION_MINUTES = 90;
 
 function App() {
   const [activeSection, setActiveSection] = useState<SectionId>(SectionId.INTRO);
@@ -72,7 +68,6 @@ function App() {
       case SectionId.MODERN: return <ModernConnectSection />;
       case SectionId.REVIEW: return <ReviewSection />;
       case SectionId.SUMMARY: return <SummarySection />;
-      case SectionId.Q_AND_A: return <StudentQASection />;
       case SectionId.EXIT_TICKET: return <ExitTicket />;
       default: return <IntroSection />;
     }
@@ -116,7 +111,7 @@ function App() {
                 <h1 className="font-bold text-base leading-tight">المجتمع الدولي</h1>
                 <p className="text-xs text-legal-400 flex items-center gap-1">
                   مدخل وتطور تاريخي 
-                  <span className="text-[10px] opacity-50 font-mono border border-legal-600 px-1 rounded bg-legal-800 text-gold-400">v1.2</span>
+                  <span className="text-[10px] opacity-50 font-mono border border-legal-600 px-1 rounded bg-legal-800 text-gold-400">v1.1</span>
                 </p>
               </div>
             </div>

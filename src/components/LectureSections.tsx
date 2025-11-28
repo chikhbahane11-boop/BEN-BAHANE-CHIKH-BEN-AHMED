@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowRight, 
   CheckCircle2, 
@@ -23,11 +23,7 @@ import {
   Lightbulb,
   Target,
   FileText,
-  ClipboardCheck,
-  ExternalLink,
-  History,
-  MessageCircleQuestion,
-  GraduationCap
+  ClipboardCheck
 } from 'lucide-react';
 import { 
   NATIONAL_VS_INTL, 
@@ -47,11 +43,10 @@ import {
   COMPONENTS_DEEP_DIVE,
   SUBJECTS_DEEP_DIVE,
   MODERN_DEEP_DIVE,
-  GOOGLE_FORM_URL,
-  GOOGLE_FORM_RESPONSES_URL,
   SUMMARY_CARDS,
   LEARNING_OBJECTIVES,
-  STUDENT_QA_CONTENT
+  GOOGLE_FORM_URL,
+  GOOGLE_FORM_RESPONSES_URL
 } from '../constants';
 import { LockedQuestion } from '../types';
 
@@ -111,44 +106,6 @@ const GlossaryText: React.FC<{ text: string }> = ({ text }) => {
         </div>
       )}
     </>
-  );
-};
-
-// --- Helper: Rich Text (Ultra Safe Version) ---
-const RichGlossaryText: React.FC<{ text: string }> = ({ text }) => {
-  if (!text || typeof text !== 'string') return <span className="text-gray-400 text-xs">...</span>;
-
-  const lines = text.split('\n');
-  
-  return (
-    <div className="space-y-3">
-      {lines.map((line, lineIdx) => {
-        let content = line.trim();
-        if (!content) return null; 
-        
-        // Handle List Item
-        const isList = content.startsWith('* ');
-        if (isList) content = content.substring(2);
-
-        // Handle Bold (**text**)
-        const parts = content.split(/(\*\*.*?\*\*)/g);
-        
-        return (
-          <div key={lineIdx} className={`${isList ? 'flex items-start gap-3 mr-2' : ''}`}>
-            {isList && <div className="w-2 h-2 rounded-full bg-gold-500 mt-2.5 shrink-0 shadow-sm" />}
-            <span className={`text-legal-700 leading-relaxed ${isList ? 'text-base' : 'text-lg'}`}>
-               {parts.map((part, partIdx) => {
-                 if (part.startsWith('**') && part.endsWith('**')) {
-                   const cleanPart = part.substring(2, part.length - 2);
-                   return <strong key={partIdx} className="text-legal-900 font-bold bg-gold-50 px-1 rounded"><GlossaryText text={cleanPart} /></strong>;
-                 }
-                 return <GlossaryText key={partIdx} text={part} />;
-               })}
-            </span>
-          </div>
-        );
-      })}
-    </div>
   );
 };
 
@@ -403,18 +360,10 @@ export const IntroSection: React.FC = () => {
                     <td className="p-5 font-semibold text-legal-500 group-hover:text-gold-600 transition-colors">{row.criteria}</td>
                     <td className="p-5 text-legal-800 font-medium text-lg leading-relaxed"><GlossaryText text={row.national} /></td>
                     <td className="p-5 relative bg-blue-50/10 group-hover:bg-blue-50/30 transition-colors">
-                      <div className={`transition-all duration-700 ease-out ${isRevealed ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-sm translate-y-2'}`}>
-                        <div className="text-lg text-blue-900 font-medium leading-relaxed">
-                            <GlossaryText text={row.international} />
-                        </div>
+                      <div className={`transition-all duration-700 ease-out ${isRevealed ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-sm -translate-y-2'}`}>
+                        <GlossaryText text={row.international} />
                       </div>
-                      {!isRevealed && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-sm bg-white/80 backdrop-blur px-3 py-1 rounded-full border border-legal-200 text-legal-400 shadow-sm group-hover:scale-105 transition-transform">
-                                  اضغط للكشف
-                              </span>
-                          </div>
-                      )}
+                      {!isRevealed && <div className="absolute inset-0 flex items-center justify-center text-blue-400 font-bold text-sm tracking-widest bg-white/50 backdrop-blur-sm">اضغط للكشف</div>}
                     </td>
                   </tr>
                 );
@@ -434,13 +383,11 @@ export const ComponentsSection: React.FC = () => {
   const [activeCard, setActiveCard] = useState<number | null>(null);
 
   return (
-    <div className="space-y-10">
-       <div className="bg-gradient-to-r from-white to-legal-50 p-8 rounded-2xl shadow-soft border-r-4 border-gold-500 mb-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 opacity-10 -rotate-12 transform translate-x-10 -translate-y-4">
-             <Scale size={120} />
-        </div>
-        <p className="text-legal-800 text-xl font-serif leading-loose relative z-10">
-          لإطلاق مصطلح <span className="font-bold text-legal-900">"مجتمع دولي"</span> على أي تجمع، يجب توفر <span className="text-gold-600 font-bold bg-gold-50 px-2 rounded">4 أركان (مقومات)</span> لا غنى عنها. غياب أحدها يعني انتفاء صفة المجتمع الدولي.
+    <div className="space-y-8 animate-fade-in">
+       <div className="bg-white p-8 rounded-2xl shadow-soft border-l-8 border-gold-500 mb-8 flex items-start gap-4">
+        <Lightbulb className="text-gold-500 shrink-0 mt-1" size={24} />
+        <p className="text-legal-700 text-lg font-serif leading-loose">
+          لإطلاق مصطلح "<span className="font-bold text-legal-900">مجتمع دولي</span>" على أي تجمع، يجب توفر 4 أركان (مقومات) لا غنى عنها. غياب أحدها يعني انتفاء صفة المجتمع الدولي.
         </p>
       </div>
 
@@ -452,69 +399,44 @@ export const ComponentsSection: React.FC = () => {
               key={idx} 
               onClick={() => setActiveCard(isActive ? null : idx)}
               className={`
-                relative p-8 rounded-2xl shadow-card cursor-pointer transition-all duration-500 border overflow-hidden group
+                relative p-8 rounded-3xl shadow-sm cursor-pointer transition-all duration-500 border overflow-hidden group
                 ${isActive 
-                  ? 'bg-legal-900 text-white border-legal-900 md:col-span-2 shadow-2xl scale-[1.01]' 
-                  : 'bg-white text-legal-800 border-transparent hover:border-gold-200 hover:shadow-lg hover:-translate-y-1'
+                  ? 'bg-legal-900 text-white border-legal-900 row-span-2 shadow-2xl scale-[1.02] z-10' 
+                  : 'bg-white text-legal-800 border-legal-100 hover:border-gold-300 hover:shadow-lg'
                 }
               `}
             >
-              <span className={`absolute top-4 left-6 text-6xl font-black opacity-5 font-serif transition-colors ${isActive ? 'text-white' : 'text-legal-900'}`}>
-                  0{idx + 1}
-              </span>
-
-              <div className="flex items-center gap-4 mb-6 relative z-10">
-                <div className={`p-3 rounded-xl transition-colors ${isActive ? 'bg-gold-500 text-legal-900' : 'bg-legal-50 text-gold-600 group-hover:bg-gold-50'}`}>
-                    {idx === 0 ? <Globe size={24} /> : idx === 1 ? <Users2 size={24}/> : idx === 2 ? <ShieldCheck size={24}/> : <Scale size={24}/>}
-                </div>
-                <h3 className={`text-2xl font-bold font-serif ${isActive ? 'text-gold-400' : 'text-legal-900'}`}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-2xl font-bold font-serif transition-colors ${isActive ? 'text-gold-400' : 'text-legal-800'}`}>
                   {comp.title}
                 </h3>
+                <span className={`text-4xl font-black opacity-10 ${isActive ? 'text-white' : 'text-legal-900'}`}>0{idx + 1}</span>
               </div>
               
-              {!isActive && (
-                <div className="mb-4 leading-loose text-base text-legal-600 line-clamp-3 relative z-10 font-medium">
-                   {/* Don't show full text when closed to keep it clean */}
-                </div>
-              )}
+              <div className={`mb-4 leading-relaxed text-lg transition-colors ${isActive ? 'text-gray-200' : 'text-legal-600'}`}>
+                 <GlossaryText text={comp.description} />
+              </div>
               
-              <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isActive ? 'max-h-[800px] opacity-100 pt-4' : 'max-h-0 opacity-0'}`}>
-                {/* Description Text shown ONLY when active */}
-                {isActive && (
-                  <div className="mb-8 leading-loose text-lg text-gray-300 relative z-10 font-medium border-b border-legal-700 pb-6">
-                     <GlossaryText text={comp.description} />
+              <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isActive ? 'max-h-[600px] opacity-100 mt-8 pt-8 border-t border-legal-800' : 'max-h-0 opacity-0'}`}>
+                <div className="mb-6">
+                  <p className="text-sm font-bold text-gold-500 mb-3 uppercase tracking-wider">أمثلة تطبيقية:</p>
+                  <div className="flex flex-wrap gap-3">
+                    {comp.examples.map((ex, i) => (
+                      <span key={i} className="text-sm bg-legal-800 px-3 py-1.5 rounded-lg text-gray-200 border border-legal-700 shadow-sm">{ex}</span>
+                    ))}
                   </div>
-                )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                    <div>
-                         <p className="text-sm font-bold text-gold-400 mb-4 uppercase tracking-wider flex items-center gap-2">
-                             <Check size={16}/> أمثلة تطبيقية:
-                         </p>
-                         <div className="flex flex-wrap gap-3">
-                            {comp.examples.map((ex, i) => (
-                            <span key={i} className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-gray-100 border border-white/10 transition-colors backdrop-blur-sm">
-                                {ex}
-                            </span>
-                            ))}
-                         </div>
-                    </div>
-                    
-                    <div className="bg-legal-800/50 p-6 rounded-xl border border-legal-700 backdrop-blur-sm">
-                        <div className="flex items-start gap-3 text-base text-gray-200 font-medium leading-relaxed">
-                            <Globe size={20} className="text-gold-500 mt-1 shrink-0" />
-                            <span><strong className="text-gold-400 block mb-1">واقعنا اليوم:</strong> {comp.realWorld}</span>
-                        </div>
-                    </div>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gold-300 font-medium bg-white/5 p-4 rounded-xl border border-white/10">
+                  <Globe size={20} className="shrink-0" />
+                  <span className="leading-relaxed">مثال واقعي: {comp.realWorld}</span>
                 </div>
               </div>
               
               {!isActive && (
-                <div className="mt-6 pt-4 border-t border-legal-50 flex justify-between items-center opacity-60 group-hover:opacity-100 transition-opacity">
-                   <span className="text-xs font-bold text-legal-400">اضغط للمزيد</span>
-                   <div className="text-xs text-gold-600 font-bold flex items-center gap-1 bg-gold-50 px-3 py-1 rounded-full">
-                     عرض التفاصيل <ArrowRight size={12} className="rotate-180" />
-                   </div>
+                <div className="mt-6 flex justify-end">
+                    <span className="text-xs font-bold text-gold-600 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+                      انقر للتفاصيل <ArrowRight size={14} className="rotate-180" />
+                    </span>
                 </div>
               )}
             </div>
@@ -534,8 +456,6 @@ export const HistorySection: React.FC = () => {
   const [showQuiz, setShowQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  const [isQuizLocked, setIsQuizLocked] = useState(false); 
-
   const activeEvent = HISTORY_EVENTS[activeTab];
 
   const handleTabChange = (idx: number) => {
@@ -551,66 +471,35 @@ export const HistorySection: React.FC = () => {
     setQuizFeedback(optIdx === activeEvent.quiz.correctIndex ? 'correct' : 'incorrect');
   };
 
-  const renderExtraInfo = (text?: string) => {
-    if (!text) return null;
-    
-    // Check for separator
-    const hasSeparator = text.includes('|||');
-    
-    if (hasSeparator) {
-        const parts = text.split('|||');
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div className="bg-blue-50 border border-blue-100 p-8 rounded-2xl flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4 font-bold text-xl font-serif">1</div>
-                    <RichGlossaryText text={parts[0]} />
-                </div>
-                <div className="bg-amber-50 border border-amber-100 p-8 rounded-2xl flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-4 font-bold text-xl font-serif">2</div>
-                    <RichGlossaryText text={parts[1]} />
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-100 p-8 rounded-2xl mb-10 shadow-sm">
-             <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2 text-xl font-serif"><BookOpen size={24} className="text-blue-500"/> تفاصيل المحطة التاريخية</h4>
-             <RichGlossaryText text={text} />
-        </div>
-    );
-  };
-
   return (
-    <div className="flex flex-col min-h-full pb-20">
-      {/* Tabs */}
-      <div className="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide shrink-0 px-1">
+    <div className="flex flex-col h-full animate-fade-in">
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-4 scrollbar-hide snap-x">
         {HISTORY_EVENTS.map((event, idx) => (
           <button
             key={idx}
             onClick={() => handleTabChange(idx)}
-            className={`px-6 py-4 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-3 text-base shadow-sm ${
-              activeTab === idx
-                ? 'bg-legal-900 text-white shadow-xl scale-105 ring-2 ring-gold-500 ring-offset-2'
-                : 'bg-white text-legal-500 hover:bg-legal-50 border border-legal-100'
-            }`}
+            className={`
+              snap-start px-6 py-4 rounded-2xl font-bold whitespace-nowrap transition-all flex items-center gap-3 border-2
+              ${activeTab === idx
+                ? 'bg-legal-900 text-white border-legal-900 shadow-lg scale-105'
+                : 'bg-white text-legal-500 hover:bg-legal-50 border-transparent hover:border-legal-200'
+              }
+            `}
           >
             <span className="text-xl">{event.icon}</span>
-            <span className={activeTab === idx ? 'text-gold-400' : ''}>{event.civilization}</span>
+            <span className="font-serif">{event.civilization}</span>
           </button>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl shadow-soft border border-legal-100 overflow-hidden flex-1 flex flex-col relative transition-all duration-300">
-        <div className={`p-8 sm:p-12 flex-1 overflow-y-auto ${showQuiz ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-legal-100">
+      <div className="bg-white rounded-3xl shadow-soft border border-legal-200 overflow-hidden flex-1 flex flex-col relative transition-all duration-500">
+        <div className={`p-8 md:p-10 flex-1 transition-all duration-500 ${showQuiz ? 'blur-md opacity-30 pointer-events-none scale-95' : 'scale-100'}`}>
+            <div className="flex items-center justify-between mb-8 border-b border-legal-100 pb-6">
               <div>
-                <span className="text-gold-600 font-bold tracking-widest text-xs uppercase bg-gold-50 px-3 py-1 rounded-full mb-3 inline-block">{activeEvent.period}</span>
-                <h2 className="text-3xl sm:text-4xl font-bold text-legal-900 mt-1 font-serif">{activeEvent.treatyName}</h2>
+                <span className="inline-block bg-gold-100 text-gold-700 px-3 py-1 rounded-full text-xs font-bold tracking-wider mb-2 font-mono">{activeEvent.period}</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-legal-900 font-serif">{activeEvent.treatyName}</h2>
               </div>
-              <div className="mt-4 md:mt-0 opacity-10">
-                 <History size={64} />
-              </div>
+              <div className="text-6xl opacity-10 grayscale">{activeEvent.icon}</div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -618,48 +507,44 @@ export const HistorySection: React.FC = () => {
                  if (key === 'extraInfo') return null;
                  return (
                    <div key={i} className="bg-legal-50/50 p-6 rounded-2xl border border-legal-100 hover:border-gold-200 transition-colors">
-                     <span className="text-xs text-legal-400 font-bold block mb-2 uppercase tracking-wide">
+                     <span className="text-xs text-legal-400 font-bold block mb-2 uppercase tracking-widest">
                        {key === 'parties' ? 'الأطراف' : key === 'topic' ? 'الموضوع' : 'الآلية/الحل'}
                      </span>
-                     <p className="text-base font-bold text-legal-800 leading-relaxed font-serif"><GlossaryText text={val} /></p>
+                     <p className="text-base font-medium text-legal-800 leading-snug"><GlossaryText text={val} /></p>
                    </div>
                  );
                })}
             </div>
 
             {/* Detailed Breakdown */}
-            {renderExtraInfo(activeEvent.details.extraInfo)}
+            {activeEvent.details.extraInfo && (
+              <div className="bg-[#f0f9ff] border border-blue-100 p-8 rounded-2xl mb-10 shadow-inner">
+                 <h4 className="font-bold text-blue-900 mb-6 flex items-center gap-2 text-lg">
+                    <BookOpen size={20} className="text-blue-500"/> تفاصيل المحطة التاريخية
+                 </h4>
+                 <div className="text-blue-900 leading-loose text-lg">
+                    <GlossaryText text={activeEvent.details.extraInfo} />
+                 </div>
+              </div>
+            )}
 
             {/* Milestones */}
             <div className="bg-legal-900 text-white rounded-2xl p-8 mb-10 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-              <h4 className="font-bold text-gold-400 flex items-center gap-3 mb-6 text-xl relative z-10 font-serif">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold-500 to-transparent"></div>
+              <h4 className="font-bold text-gold-400 flex items-center gap-3 mb-6 text-xl font-serif">
                 <Trophy size={24} />
-                أهم المحطات والمبادئ المستخلصة
+                أهم المبادئ المستخلصة
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {activeEvent.achievements.map((ach, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-white/5 p-4 rounded-xl hover:bg-white/10 transition-colors border border-white/5">
-                    <div className="w-2 h-2 rounded-full bg-gold-500 mt-2.5 shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
-                    <span className="text-base font-medium leading-relaxed text-gray-100">{ach}</span>
+                  <div key={i} className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gold-500 mt-2 shrink-0 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
+                    <span className="text-sm md:text-base font-medium leading-relaxed text-gray-200">{ach}</span>
                   </div>
                 ))}
               </div>
             </div>
             
-            {/* Modern Impact */}
-            {activeEvent.modernImpact && (
-              <div className="bg-green-50 border border-green-100 rounded-xl p-6 mb-8 shadow-sm">
-                <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
-                  <Globe size={18} />
-                  الأثر في عالمنا اليوم:
-                </h4>
-                <p className="text-green-900 leading-relaxed font-medium">
-                  <GlossaryText text={activeEvent.modernImpact} />
-                </p>
-              </div>
-            )}
-
             {activeEvent.discussionQuestions && (
                <TeacherLockedPanel title="مناقشة تاريخية معمقة" questions={activeEvent.discussionQuestions} />
             )}
@@ -671,60 +556,55 @@ export const HistorySection: React.FC = () => {
 
         {/* Quiz Start Button */}
         {!showQuiz && (
-          <div className="absolute bottom-10 left-10 z-10">
+          <div className="sticky bottom-0 left-0 p-8 bg-gradient-to-t from-white via-white to-transparent z-10 flex justify-end">
             <button 
-              onClick={() => isQuizLocked ? {} : setShowQuiz(true)}
-              className={`
-                px-8 py-4 rounded-full shadow-glow font-bold flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95
-                ${isQuizLocked 
-                  ? 'bg-gray-400 text-white opacity-90 cursor-not-allowed' 
-                  : 'bg-gold-500 hover:bg-gold-600 text-white'
-                }
-              `}
+              onClick={() => setShowQuiz(true)}
+              className="px-8 py-4 bg-gold-500 hover:bg-gold-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-3 text-lg group"
             >
-              <span className="bg-white/20 p-1 rounded-full">{isQuizLocked ? <Lock size={18} /> : <HelpCircle size={18} />}</span>
-              <span className="text-lg">{isQuizLocked ? 'اختبار المرحلة (مغلق)' : 'اختبر معلوماتك الآن'}</span>
+              <HelpCircle size={24} className="group-hover:rotate-12 transition-transform" />
+              اختبر فهمك لهذه المرحلة
             </button>
           </div>
         )}
 
-        {/* Quiz Modal */}
+        {/* Quiz Modal Overlay */}
         {showQuiz && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center p-4 animate-fade-in bg-white/60 backdrop-blur-sm">
-             <div className="bg-white border border-legal-100 shadow-2xl rounded-3xl p-8 max-w-2xl w-full relative max-h-[90vh] overflow-y-auto ring-4 ring-legal-50">
-                <button onClick={() => setShowQuiz(false)} className="absolute top-6 left-6 text-legal-400 hover:text-red-500 bg-legal-50 p-2 rounded-full transition-colors"><X size={20} /></button>
+          <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-white/50 backdrop-blur-md animate-fade-in">
+             <div className="bg-white border border-legal-200 shadow-2xl rounded-3xl p-8 max-w-2xl w-full relative">
+                <button onClick={() => setShowQuiz(false)} className="absolute top-6 left-6 text-legal-400 hover:text-red-500 transition-colors bg-legal-50 p-2 rounded-full"><XCircle size={24} /></button>
                 
-                <span className="text-gold-600 text-xs font-bold uppercase tracking-widest mb-2 block">سؤال التقييم</span>
-                <h3 className="text-2xl font-bold text-legal-900 mb-8 pr-8 leading-snug font-serif">{activeEvent.quiz.question}</h3>
+                <span className="inline-block px-3 py-1 bg-gold-100 text-gold-700 rounded-lg text-xs font-bold mb-4">سؤال تفاعلي</span>
+                <h3 className="text-2xl font-bold text-legal-900 mb-8 font-serif leading-relaxed pr-12">{activeEvent.quiz.question}</h3>
                 
                 <div className="space-y-4 mb-8">
                   {activeEvent.quiz.options.map((option, i) => {
                     const isSelected = selectedOption === i;
                     const isCorrect = i === activeEvent.quiz.correctIndex;
-                    let btnClass = "w-full text-right p-5 rounded-2xl border-2 font-medium transition-all text-lg flex justify-between items-center group ";
+                    let btnClass = "w-full text-right p-5 rounded-2xl border-2 font-medium transition-all text-lg flex justify-between items-center ";
                     
-                    if (selectedOption === null) btnClass += "border-legal-100 hover:border-gold-400 hover:bg-gold-50 hover:shadow-md text-legal-700";
-                    else if (isCorrect) btnClass += "border-green-500 bg-green-50 text-green-900 shadow-sm";
-                    else if (isSelected) btnClass += "border-red-500 bg-red-50 text-red-900 shadow-sm";
-                    else btnClass += "border-legal-100 opacity-40 grayscale";
+                    if (selectedOption === null) btnClass += "border-legal-100 hover:border-gold-400 hover:bg-legal-50 text-legal-700";
+                    else if (isCorrect) btnClass += "border-green-500 bg-green-50 text-green-900 shadow-inner";
+                    else if (isSelected) btnClass += "border-red-500 bg-red-50 text-red-900 opacity-60";
+                    else btnClass += "border-legal-100 text-legal-400 opacity-40";
 
                     return (
                       <button key={i} disabled={selectedOption !== null} onClick={() => handleQuizAnswer(i)} className={btnClass}>
                         <span>{option}</span>
-                        {selectedOption !== null && isCorrect && <CheckCircle2 className="text-green-600" size={24} />}
-                        {isSelected && !isCorrect && <XCircle className="text-red-600" size={24} />}
-                        {selectedOption === null && <div className="w-4 h-4 rounded-full border-2 border-legal-300 group-hover:border-gold-500"></div>}
+                        {selectedOption !== null && isCorrect && <CheckCircle2 className="text-green-600 animate-bounce-in" size={24} />}
+                        {isSelected && !isCorrect && <XCircle className="text-red-600 animate-shake" size={24} />}
                       </button>
                     );
                   })}
                 </div>
                 {quizFeedback && (
-                  <div className={`p-6 rounded-2xl text-base animate-slide-up ${quizFeedback === 'correct' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'}`}>
-                    <span className="font-bold text-lg mb-2 flex items-center gap-2">
-                        {quizFeedback === 'correct' ? <CheckCircle2 size={20}/> : <XCircle size={20}/>}
-                        {quizFeedback === 'correct' ? 'إجابة صحيحة!' : 'إجابة خاطئة'}
-                    </span>
-                    <p className="opacity-90 leading-relaxed">{activeEvent.quiz.explanation}</p>
+                  <div className={`p-6 rounded-2xl text-base animate-fade-in border flex gap-4 ${quizFeedback === 'correct' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                    <div className={`mt-1 ${quizFeedback === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
+                         {quizFeedback === 'correct' ? <CheckCircle2 size={24}/> : <XCircle size={24}/>}
+                    </div>
+                    <div>
+                        <span className="font-bold block mb-2 text-lg">{quizFeedback === 'correct' ? 'أحسنت! إجابة دقيقة.' : 'للأسف، إجابة خاطئة.'}</span>
+                        <p className="leading-relaxed opacity-90">{activeEvent.quiz.explanation}</p>
+                    </div>
                   </div>
                 )}
              </div>
@@ -735,7 +615,7 @@ export const HistorySection: React.FC = () => {
   );
 };
 
-// --- Subjects Section (ROBUST VERSION) ---
+// --- Subjects Section ---
 export const SubjectsSection: React.FC = () => {
   const [mode, setMode] = useState<'learn' | 'play'>('learn');
   const [score, setScore] = useState(0);
@@ -743,23 +623,18 @@ export const SubjectsSection: React.FC = () => {
   const [lastFeedback, setLastFeedback] = useState<{msg: string, correct: boolean} | null>(null);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Robust check: Ensure game items exist
-  const hasGameItems = CLASSIFICATION_GAME_ITEMS && CLASSIFICATION_GAME_ITEMS.length > 0;
-  const currentItem = hasGameItems ? CLASSIFICATION_GAME_ITEMS[gameIndex] : null;
-
   const handleGameChoice = (type: 'state' | 'org' | 'special') => {
-    if (!currentItem) return;
-    
-    const isCorrect = currentItem.type === type;
+    const item = CLASSIFICATION_GAME_ITEMS[gameIndex];
+    const isCorrect = item.type === type;
     if (isCorrect) setScore(s => s + 1);
-    setLastFeedback({ msg: isCorrect ? currentItem.feedback : 'خطأ! حاول التذكر.', correct: isCorrect });
+    setLastFeedback({ msg: isCorrect ? item.feedback : 'خطأ! حاول التذكر.', correct: isCorrect });
     
     setTimeout(() => {
       if (gameIndex < CLASSIFICATION_GAME_ITEMS.length - 1) {
         setGameIndex(g => g + 1);
         setLastFeedback(null);
       } else setIsFinished(true);
-    }, 1500);
+    }, 2000);
   };
 
   const resetGame = () => {
@@ -770,52 +645,69 @@ export const SubjectsSection: React.FC = () => {
     setMode('learn');
   };
 
-  if (mode === 'play' && hasGameItems) return (
-    <div className="bg-orange-500 rounded-2xl shadow-xl p-8 max-w-3xl mx-auto text-center text-white relative overflow-hidden border-4 border-orange-300">
+  if (mode === 'play') return (
+    <div className="bg-legal-900 rounded-3xl shadow-2xl p-8 md:p-12 max-w-4xl mx-auto text-center text-white relative overflow-hidden border-4 border-gold-500 animate-fade-in">
+      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+      
       {!isFinished ? (
-        <>
-          <div className="flex justify-between text-orange-100 mb-8 text-sm font-mono font-bold">
-            <span>السؤال {gameIndex + 1}/{CLASSIFICATION_GAME_ITEMS.length}</span>
-            <span>النتيجة: {score}</span>
+        <div className="relative z-10">
+          <div className="flex justify-between text-legal-400 mb-12 font-mono text-sm border-b border-legal-800 pb-4">
+            <span>Question {gameIndex + 1} / {CLASSIFICATION_GAME_ITEMS.length}</span>
+            <span className="text-gold-400 font-bold">Score: {score}</span>
           </div>
-          <h3 className="text-orange-100 mb-4 font-bold text-lg">ما هو التصنيف القانوني لهذا الكيان؟</h3>
-          <h2 className="text-4xl font-black mb-12 font-serif">{currentItem?.name}</h2>
+          
+          <div className="mb-12">
+            <span className="text-legal-400 text-sm uppercase tracking-widest mb-4 block">صنف الكيان التالي</span>
+            <h2 className="text-5xl font-black mb-6 font-serif">{CLASSIFICATION_GAME_ITEMS[gameIndex].name}</h2>
+          </div>
           
           {lastFeedback ? (
-            <div className={`p-6 rounded-xl text-xl font-bold animate-bounce-in shadow-lg ${lastFeedback.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-              {lastFeedback.msg}
+            <div className={`p-8 rounded-2xl text-2xl font-bold animate-bounce-in shadow-xl ${lastFeedback.correct ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+              <div className="flex flex-col items-center gap-4">
+                  {lastFeedback.correct ? <CheckCircle2 size={48} /> : <XCircle size={48} />}
+                  {lastFeedback.msg}
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <button onClick={() => handleGameChoice('state')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">دولة (شخص أصلي)</button>
-              <button onClick={() => handleGameChoice('org')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">منظمة (شخص وظيفي)</button>
-              <button onClick={() => handleGameChoice('special')} className="p-4 bg-white/10 hover:bg-white/30 text-white rounded-xl font-bold transition-all border-2 border-white/20 hover:border-white shadow-sm hover:scale-105">وضع خاص</button>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <button onClick={() => handleGameChoice('state')} className="group p-6 bg-legal-800 hover:bg-gold-500 rounded-2xl font-bold transition-all hover:-translate-y-2 border border-legal-700 hover:border-gold-400">
+                <Building2 size={32} className="mx-auto mb-4 text-legal-500 group-hover:text-legal-900 transition-colors" />
+                <span className="group-hover:text-legal-900">دولة (شخص أصلي)</span>
+              </button>
+              <button onClick={() => handleGameChoice('org')} className="group p-6 bg-legal-800 hover:bg-gold-500 rounded-2xl font-bold transition-all hover:-translate-y-2 border border-legal-700 hover:border-gold-400">
+                <Users2 size={32} className="mx-auto mb-4 text-legal-500 group-hover:text-legal-900 transition-colors" />
+                <span className="group-hover:text-legal-900">منظمة (شخص وظيفي)</span>
+              </button>
+              <button onClick={() => handleGameChoice('special')} className="group p-6 bg-legal-800 hover:bg-gold-500 rounded-2xl font-bold transition-all hover:-translate-y-2 border border-legal-700 hover:border-gold-400">
+                <ShieldCheck size={32} className="mx-auto mb-4 text-legal-500 group-hover:text-legal-900 transition-colors" />
+                <span className="group-hover:text-legal-900">وضع خاص</span>
+              </button>
             </div>
           )}
-        </>
+        </div>
       ) : (
-        <div className="py-8 animate-fade-in">
-          <Trophy size={80} className="text-yellow-300 mx-auto mb-6 drop-shadow-md" />
-          <h2 className="text-3xl font-bold mb-4 font-serif">انتهت اللعبة!</h2>
-          <p className="text-xl mb-8 font-bold">نتيجتك: {score} / {CLASSIFICATION_GAME_ITEMS.length}</p>
-          <button onClick={resetGame} className="bg-white text-orange-600 px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg">العودة للدرس</button>
+        <div className="py-12 animate-fade-in relative z-10">
+          <Trophy size={100} className="text-gold-400 mx-auto mb-8 animate-bounce" />
+          <h2 className="text-4xl font-bold mb-6 font-serif">انتهت اللعبة!</h2>
+          <p className="text-2xl mb-12 text-gray-300">نتيجتك النهائية: <span className="text-gold-400 font-bold text-4xl mx-2">{score}</span> / {CLASSIFICATION_GAME_ITEMS.length}</p>
+          <button onClick={resetGame} className="bg-white text-legal-900 px-10 py-4 rounded-full font-bold hover:bg-gold-400 transition-colors text-lg shadow-lg">العودة للدرس</button>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="space-y-10">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-12 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {SUBJECTS_DATA.map((subj, idx) => (
-          <div key={idx} className="bg-white rounded-xl shadow-sm p-8 border-t-8 border-legal-600 hover:-translate-y-2 transition-transform duration-300">
-            <div className="bg-legal-50 w-14 h-14 rounded-full flex items-center justify-center text-legal-800 mb-6 shadow-inner">
-              {idx === 0 ? <Building2 size={28} /> : idx === 1 ? <Users2 size={28} /> : <ShieldCheck size={28} />}
+          <div key={idx} className="bg-white rounded-3xl shadow-soft p-8 border-t-8 border-legal-600 hover:-translate-y-2 transition-transform duration-300 group">
+            <div className="bg-legal-50 w-16 h-16 rounded-2xl flex items-center justify-center text-legal-800 mb-6 group-hover:bg-legal-900 group-hover:text-gold-400 transition-colors shadow-sm">
+              {idx === 0 ? <Building2 size={32} /> : idx === 1 ? <Users2 size={32} /> : <ShieldCheck size={32} />}
             </div>
             <h3 className="text-xl font-bold text-legal-900 mb-3 font-serif"><GlossaryText text={subj.type} /></h3>
-            <p className="text-base text-legal-600 mb-6 min-h-[3rem] leading-relaxed"><GlossaryText text={subj.desc} /></p>
-            <div className="flex flex-wrap gap-2">
-              {subj.elements.map((el, i) => <span key={i} className="text-xs border border-legal-200 px-3 py-1.5 rounded-full bg-legal-50 text-legal-600 font-bold">{el}</span>)}
+            <p className="text-base text-legal-600 mb-6 h-20 leading-relaxed"><GlossaryText text={subj.desc} /></p>
+            <div className="flex flex-wrap gap-2 pt-6 border-t border-legal-50">
+              {subj.elements.map((el, i) => <span key={i} className="text-xs font-bold border border-legal-200 px-2.5 py-1 rounded-md bg-white text-legal-500">{el}</span>)}
             </div>
           </div>
         ))}
@@ -823,26 +715,14 @@ export const SubjectsSection: React.FC = () => {
       
       <HandoutBox content={SUBJECTS_ENRICHMENT.content} source={SUBJECTS_ENRICHMENT.sourcePage} />
       
-      {/* Game Banner - Fixed Clickability with z-index and relative layout */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative z-10 overflow-hidden group border border-orange-400">
-        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-        <div className="mb-6 md:mb-0 text-center md:text-right relative z-10">
-          <h3 className="text-3xl font-bold mb-2 font-serif flex items-center gap-2 justify-center md:justify-start">
-            <Trophy className="text-yellow-300" />
-            لعبة: خبير التصنيف الدولي
-          </h3>
-          <p className="opacity-90 text-lg font-medium text-orange-100">اختبر قدرتك على التمييز بين أنواع أشخاص القانون الدولي.</p>
+      <div className="bg-gradient-to-r from-gold-500 to-amber-600 rounded-3xl p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        <div className="relative z-10 mb-6 md:mb-0 text-center md:text-right">
+          <h3 className="text-3xl font-bold mb-3 font-serif">لعبة: خبير التصنيف الدولي</h3>
+          <p className="opacity-90 text-lg text-amber-100">هل يمكنك التمييز بين الدول والمنظمات والكيانات الخاصة؟</p>
         </div>
-        <button 
-            onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setMode('play');
-            }} 
-            className="relative z-20 bg-white text-orange-600 px-10 py-4 rounded-full font-bold hover:bg-gray-50 transition-all shadow-lg flex gap-3 items-center hover:scale-105 active:scale-95 cursor-pointer ring-4 ring-orange-400/50"
-        >
-          <Play size={24} fill="currentColor" /> 
-          <span className="text-lg">ابدأ التحدي</span>
+        <button onClick={() => setMode('play')} className="relative z-10 bg-white text-amber-700 px-8 py-4 rounded-2xl font-bold hover:bg-legal-900 hover:text-gold-400 transition-colors shadow-lg flex gap-3 items-center group">
+          <Play size={24} fill="currentColor" className="group-hover:scale-110 transition-transform"/> ابدأ التحدي
         </button>
       </div>
 
@@ -852,96 +732,71 @@ export const SubjectsSection: React.FC = () => {
 };
 
 // --- Modern Section ---
-export const ModernConnectSection: React.FC = () => {
-  if (!MODERN_EXAMPLES) return null;
-
-  return (
-    <div className="bg-white rounded-2xl shadow-soft p-10 border border-legal-100">
-        <h3 className="text-3xl font-bold text-green-900 mb-8 flex items-center gap-3 font-serif border-b border-green-100 pb-4">
-        <div className="bg-green-100 p-2 rounded-lg text-green-600">
-            <Globe size={28} />
+export const ModernConnectSection: React.FC = () => (
+  <div className="bg-white rounded-3xl shadow-soft p-10 animate-fade-in">
+    <div className="flex items-center gap-4 mb-10 border-b border-legal-100 pb-6">
+        <div className="bg-gold-100 p-3 rounded-2xl text-gold-600">
+            <Globe size={32} />
         </div>
+        <h3 className="text-3xl font-bold text-legal-900 font-serif">
         ربط الماضي بالحاضر
         </h3>
-        
-        {/* Responsive Table Layout */}
-        <div className="overflow-hidden rounded-xl border border-green-200 bg-green-50/30">
-        <table className="w-full text-right border-collapse">
-            <thead className="bg-green-100/50">
-            <tr>
-                <th className="p-5 text-green-800 font-bold w-1/2 text-lg font-serif border-b border-green-200">المبدأ القديم (الأصل التاريخي)</th>
-                <th className="p-5 text-green-900 font-bold w-1/2 text-lg font-serif border-b border-green-200 bg-green-200/20">التطبيق المعاصر (اليوم)</th>
-            </tr>
-            </thead>
-            <tbody className="divide-y divide-green-100">
-            {MODERN_EXAMPLES.map((item, i) => (
-                <tr key={i} className="group hover:bg-green-50 transition-colors">
-                <td className="p-5 border-l border-green-100">
-                    <div className="font-bold text-green-700 text-lg mb-1 flex items-center gap-2">
-                        <History size={16} className="opacity-50"/>
-                        {item.old}
-                    </div>
-                    <span className="text-xs font-bold text-green-500 bg-green-100 px-2 py-1 rounded inline-block">{item.period}</span>
-                </td>
-                <td className="p-5 bg-white/50 group-hover:bg-white/80 transition-colors">
-                    <div className="font-bold text-green-900 text-lg flex items-center gap-2">
-                        <ArrowRight size={18} className="text-green-400 rotate-180"/>
-                        <GlossaryText text={item.new} />
-                    </div>
-                </td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
-        </div>
-
-        <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
-        <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
     </div>
-  );
-};
 
-// --- Review Section (NEW) ---
+    <div className="grid gap-6 mb-12">
+      {MODERN_EXAMPLES.map((item, i) => (
+        <div key={i} className="flex flex-col md:flex-row items-stretch md:items-center bg-legal-50 rounded-2xl border border-legal-100 overflow-hidden hover:border-gold-300 transition-colors group">
+          <div className="flex-1 p-6 flex items-center justify-between md:justify-start gap-4 bg-white/50">
+             <span className="text-legal-400 text-xs font-mono font-bold">{item.period}</span>
+             <span className="font-bold text-legal-600 text-lg group-hover:text-legal-900 transition-colors">{item.old}</span>
+          </div>
+          
+          <div className="bg-gold-100 text-gold-600 p-2 flex items-center justify-center">
+             <ArrowRight className="rotate-90 md:rotate-180" size={20} />
+          </div>
+
+          <div className="flex-1 p-6 bg-white font-bold text-legal-900 text-lg flex items-center gap-2">
+             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+             <GlossaryText text={item.new} />
+          </div>
+        </div>
+      ))}
+    </div>
+    <HandoutBox content={MODERN_ENRICHMENT.content} source={MODERN_ENRICHMENT.sourcePage} />
+    <TeacherLockedPanel questions={MODERN_DEEP_DIVE} />
+  </div>
+);
+
+// --- Review Section ---
 export const ReviewSection: React.FC = () => {
   const [revealedTF, setRevealedTF] = useState<number[]>([]);
   const [revealedNotes, setRevealedNotes] = useState<number[]>([]);
-
-  // Locking state for Teacher Notes
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [pendingNoteIdx, setPendingNoteIdx] = useState<number | null>(null);
 
   const toggleReveal = (idx: number) => {
     setRevealedTF(prev => prev.includes(idx) ? prev : [...prev, idx]);
   };
 
-  const handleNoteUnlockRequest = (idx: number) => {
-    // Direct Unlock
-    if (revealedNotes.includes(idx)) return;
-    setRevealedNotes(prev => [...prev, idx]);
-  };
-
-  const closeModal = () => {
-    setShowPasswordModal(false);
-    setPasswordInput('');
-    setPendingNoteIdx(null);
+  const toggleNote = (idx: number) => {
+      setRevealedNotes(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]);
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-lg mb-8 text-center">
-        <h2 className="text-3xl font-bold mb-2 flex justify-center items-center gap-3 font-serif">
-          <MessageCircle size={32} />
-          المراجعة والنقاش المفتوح
-        </h2>
-        <p className="opacity-90 text-lg font-medium">محطة لترسيخ المفاهيم وتبادل الآراء قبل الختام</p>
+    <div className="space-y-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-10 rounded-3xl shadow-xl mb-8 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10"></div>
+        <div className="relative z-10">
+            <h2 className="text-3xl font-bold mb-4 flex justify-center items-center gap-4 font-serif">
+            <MessageCircle size={36} className="text-blue-300" />
+            المراجعة والنقاش المفتوح
+            </h2>
+            <p className="opacity-90 text-xl font-light text-blue-100">محطة لترسيخ المفاهيم وتبادل الآراء قبل الختام</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* True / False Activity */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-legal-200">
-          <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-2 text-2xl font-serif">
+        <div className="bg-white p-8 rounded-3xl shadow-soft border border-legal-200">
+          <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-3 text-2xl font-serif">
             <CheckCircle2 className="text-green-500" size={28} />
             صواب أم خطأ؟
           </h3>
@@ -953,16 +808,18 @@ export const ReviewSection: React.FC = () => {
                   <p className="font-bold text-legal-800 mb-4 text-lg leading-relaxed">{item.statement}</p>
                   {!isRevealed ? (
                     <div className="flex gap-4">
-                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-green-100 text-legal-600 hover:text-green-700 py-3 rounded-xl font-bold transition-colors border-2 border-legal-100 hover:border-green-200">صواب</button>
-                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-red-100 text-legal-600 hover:text-red-700 py-3 rounded-xl font-bold transition-colors border-2 border-legal-100 hover:border-red-200">خطأ</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-green-100 text-legal-600 hover:text-green-700 py-3 rounded-xl font-bold transition-colors border border-legal-200 shadow-sm">صواب</button>
+                      <button onClick={() => toggleReveal(idx)} className="flex-1 bg-legal-50 hover:bg-red-100 text-legal-600 hover:text-red-700 py-3 rounded-xl font-bold transition-colors border border-legal-200 shadow-sm">خطأ</button>
                     </div>
                   ) : (
-                    <div className={`p-4 rounded-xl animate-slide-up border ${item.isTrue ? 'bg-green-50 text-green-900 border-green-200' : 'bg-red-50 text-red-900 border-red-200'}`}>
-                      <div className="flex items-center gap-2 font-black mb-2 text-lg">
-                        {item.isTrue ? <Check size={24}/> : <X size={24}/>}
-                        {item.isTrue ? 'إجابة صحيحة' : 'خطأ'}
+                    <div className={`p-4 rounded-xl animate-fade-in border flex gap-3 ${item.isTrue ? 'bg-green-50 border-green-200 text-green-900' : 'bg-red-50 border-red-200 text-red-900'}`}>
+                      <div className="mt-1">
+                        {item.isTrue ? <Check size={20}/> : <X size={20}/>}
                       </div>
-                      <p className="text-base font-medium">{item.correction}</p>
+                      <div>
+                        <span className="font-bold block mb-1">{item.isTrue ? 'إجابة صحيحة' : 'إجابة خاطئة'}</span>
+                        <p className="text-sm opacity-90 leading-relaxed">{item.correction}</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -972,44 +829,45 @@ export const ReviewSection: React.FC = () => {
         </div>
 
         {/* Open Discussion Topics */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-legal-200">
-           <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-2 text-2xl font-serif">
+        <div className="bg-white p-8 rounded-3xl shadow-soft border border-legal-200">
+           <h3 className="font-bold text-legal-900 mb-8 flex items-center gap-3 text-2xl font-serif">
             <Users2 className="text-blue-500" size={28} />
             محاور للنقاش الجماعي
           </h3>
-          <div className="space-y-8">
+          <div className="space-y-6">
              {REVIEW_CONTENT.topics.map((topic, idx) => {
                const isNoteRevealed = revealedNotes.includes(idx);
                return (
-                 <div key={idx} className="bg-blue-50/50 p-6 rounded-2xl border-l-4 border-gold-500 hover:shadow-md transition-shadow">
-                   <h4 className="font-bold text-blue-900 text-xl mb-4 font-serif">{topic.title}</h4>
+                 <div key={idx} className="bg-legal-50 p-6 rounded-2xl border-l-4 border-gold-500">
+                   <h4 className="font-bold text-legal-900 text-xl mb-4 font-serif">{topic.title}</h4>
                    <ul className="space-y-3 mb-6">
                      {topic.points.map((point, pIdx) => (
-                       <li key={pIdx} className="flex items-start gap-3 text-legal-700 font-medium">
-                         <div className="w-2 h-2 bg-blue-300 rounded-full mt-2 shrink-0"></div>
-                         <span className="leading-relaxed">{point}</span>
+                       <li key={pIdx} className="flex items-start gap-3 text-legal-700">
+                         <span className="w-1.5 h-1.5 bg-legal-400 rounded-full mt-2.5 shrink-0" />
+                         <span className="text-lg leading-relaxed">{point}</span>
                        </li>
                      ))}
                    </ul>
                    
-                   {/* Teacher Notes Reveal */}
                    {topic.teacherNotes && (
-                     <div className="mt-4 pt-4 border-t border-blue-100">
-                       {!isNoteRevealed ? (
-                         <button 
-                           onClick={() => handleNoteUnlockRequest(idx)}
-                           className="w-full py-2 rounded-lg border border-blue-200 text-blue-500 hover:text-blue-700 hover:bg-blue-100 font-bold transition-colors text-sm flex items-center justify-center gap-2"
-                         >
-                           <Lightbulb size={16} /> كشف التوجيه الأكاديمي
-                         </button>
-                       ) : (
-                         <div className="bg-white p-5 rounded-xl border border-gold-200 shadow-sm animate-fade-in relative overflow-hidden">
-                           <div className="absolute top-0 right-0 w-1 bg-gold-400 h-full"></div>
-                           <h5 className="text-sm font-bold text-gold-600 mb-2 flex items-center gap-2 uppercase tracking-wider">
+                     <div className="mt-4 pt-4 border-t border-legal-200/50">
+                       <button 
+                         onClick={() => toggleNote(idx)}
+                         className="text-xs flex items-center gap-2 text-legal-500 hover:text-gold-600 font-bold transition-colors mb-2"
+                       >
+                         {isNoteRevealed ? <Lock size={12} className="text-red-400"/> : <Unlock size={12} className="text-green-400"/>}
+                         {isNoteRevealed ? 'إخفاء التوجيه' : 'كشف التوجيه الأكاديمي'}
+                       </button>
+                       
+                       {isNoteRevealed && (
+                         <div className="bg-white p-5 rounded-xl border border-gold-200 shadow-sm animate-fade-in">
+                           <h5 className="text-sm font-bold text-gold-600 mb-3 flex items-center gap-2">
                              <Lightbulb size={16} />
-                             توجيه الأستاذ:
+                             توجيهات للأستاذ:
                            </h5>
-                           <p className="text-base text-legal-800 leading-loose font-medium whitespace-pre-line">{topic.teacherNotes}</p>
+                           <div className="text-base text-legal-800 leading-loose">
+                               <GlossaryText text={topic.teacherNotes} />
+                           </div>
                          </div>
                        )}
                      </div>
@@ -1018,186 +876,115 @@ export const ReviewSection: React.FC = () => {
                );
              })}
           </div>
-          <div className="mt-8 p-4 bg-gray-50 text-gray-600 rounded-xl text-sm text-center font-medium border border-gray-200 border-dashed">
-             يفتح الأستاذ المجال للمداخلات والآراء حول هذه القضايا المعاصرة.
-          </div>
         </div>
       </div>
     </div>
   );
 };
-
-// --- Student QA Section ---
-export const StudentQASection: React.FC = () => {
-  return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="bg-indigo-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden text-center">
-        <div className="absolute top-0 left-0 opacity-10">
-          <MessageCircleQuestion size={180} />
-        </div>
-        <div className="relative z-10">
-          <h2 className="text-3xl font-bold font-serif mb-4 flex items-center justify-center gap-3">
-             <MessageCircleQuestion size={40} className="text-indigo-300"/>
-             إجابات أسئلة الطلاب
-          </h2>
-          <p className="text-lg text-indigo-100 max-w-2xl mx-auto">
-            أسئلة جوهرية من "بطاقة الخروج" تظهر فهماً عميقاً ومتابعة دقيقة. إليكم التوضيحات الأكاديمية:
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-6">
-        {STUDENT_QA_CONTENT.map((item, idx) => (
-          <div key={idx} className="bg-white rounded-2xl shadow-soft p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow">
-             {/* Question Bubble */}
-             <div className="flex items-start gap-4 mb-4">
-               <div className="bg-gray-100 p-3 rounded-full shrink-0">
-                 <Users2 size={24} className="text-gray-600" />
-               </div>
-               <div className="bg-gray-50 rounded-2xl rounded-tr-none p-4 text-legal-800 font-bold text-lg w-full">
-                 {item.question}
-               </div>
-             </div>
-
-             {/* Answer Bubble */}
-             <div className="flex items-start gap-4 flex-row-reverse">
-                <div className="bg-indigo-100 p-3 rounded-full shrink-0">
-                  <GraduationCap size={24} className="text-indigo-700" />
-                </div>
-                <div className={`rounded-2xl rounded-tl-none p-5 text-legal-900 text-lg leading-loose font-medium w-full shadow-sm ${item.isComment ? 'bg-green-50 border border-green-200' : 'bg-indigo-50/50 border border-indigo-100'}`}>
-                   {item.isComment && <span className="text-green-600 font-bold block mb-1 text-sm">تعليق الأستاذ:</span>}
-                   <RichGlossaryText text={item.answer} />
-                </div>
-             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 
 // --- Summary Section ---
 export const SummarySection: React.FC = () => (
-    <div className="space-y-8">
-        <div className="bg-legal-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden mb-8">
-            <div className="absolute top-0 right-0 opacity-10 rotate-12 transform translate-x-20 -translate-y-10">
-                <Book size={200} />
-            </div>
-            <div className="relative z-10 text-center">
-                <h2 className="text-3xl sm:text-4xl font-bold font-serif mb-4 flex items-center justify-center gap-4">
-                    <FileText className="text-gold-500" size={40} />
-                    الملخص النظري الشامل
-                </h2>
-                <p className="text-lg text-legal-300 max-w-2xl mx-auto">خلاصة مركزة لأهم محاور المحاضرة، صممت لتكون مرجعك السريع للمراجعة.</p>
-            </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8">
-            {SUMMARY_CARDS.map((card) => (
-                <div key={card.id} className="bg-white rounded-2xl shadow-soft overflow-hidden border border-legal-100 hover:shadow-lg transition-shadow">
-                    <div className={`bg-gradient-to-r ${card.colorClass} p-4 flex items-center gap-4 text-white`}>
-                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                            <card.icon size={24} />
+  <div className="space-y-8 animate-fade-in">
+    <div className="bg-legal-900 text-white p-8 rounded-3xl shadow-lg text-center">
+        <h2 className="text-3xl font-bold flex justify-center items-center gap-3 font-serif">
+        <Book className="text-gold-500" />
+        الملخص النظري الشامل
+        </h2>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {SUMMARY_CARDS.map((card) => (
+            <div key={card.id} className="bg-white rounded-xl shadow-sm border border-legal-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className={`h-2 bg-gradient-to-r ${card.colorClass}`} />
+                <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg bg-legal-50 text-legal-800`}>
+                            <card.icon size={20} />
                         </div>
-                        <h3 className="text-xl font-bold font-serif">{card.title}</h3>
+                        <h3 className="text-xl font-bold text-legal-900 font-serif">{card.title}</h3>
                     </div>
-                    
-                    <div className="p-8 space-y-8">
-                        {card.content.map((section, idx) => (
-                            <div key={idx} className="last:mb-0">
-                                {section.subtitle && (
-                                    <h4 className="text-lg font-bold text-legal-900 mb-4 pb-2 border-b border-legal-100 flex items-center gap-2">
-                                        <span className="w-1.5 h-6 bg-gold-500 rounded-full"></span>
-                                        {section.subtitle}
-                                    </h4>
-                                )}
-                                
-                                {section.type === 'timeline' ? (
-                                    <div className="space-y-4 relative before:absolute before:top-2 before:right-[7px] before:w-0.5 before:h-full before:bg-legal-200 mr-2">
-                                        {section.items.map((item, i) => (
-                                            <div key={i} className="relative pr-8">
-                                                <div className="absolute top-2 right-0 w-4 h-4 rounded-full bg-white border-4 border-legal-400"></div>
-                                                <RichGlossaryText text={item} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : section.type === 'cards' ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {section.items.map((item, i) => (
-                                            <div key={i} className="bg-legal-50 p-4 rounded-xl border border-legal-100 text-legal-800 leading-relaxed font-medium hover:bg-white hover:shadow-md transition-all">
-                                                <RichGlossaryText text={item} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <ul className="space-y-3">
-                                        {section.items.map((item, i) => (
-                                            <li key={i} className="flex items-start gap-3">
-                                                <CheckCircle2 size={18} className="text-green-500 mt-1.5 shrink-0" />
-                                                <span className="text-legal-700 leading-loose text-lg font-medium"><RichGlossaryText text={item} /></span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                    <div className="space-y-4">
+                        {card.content.map((sect, idx) => (
+                            <div key={idx}>
+                                {sect.subtitle && <h4 className="font-bold text-sm text-legal-500 uppercase tracking-wider mb-2">{sect.subtitle}</h4>}
+                                <ul className="space-y-2">
+                                    {sect.items.map((item, i) => (
+                                        <li key={i} className="text-legal-700 text-sm flex items-start gap-2">
+                                            <span className="text-gold-500 mt-1.5">•</span>
+                                            <span><GlossaryText text={item} /></span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         ))}
                     </div>
                 </div>
-            ))}
-        </div>
-        
-        <div className="flex justify-center mt-12">
-             <button 
-                onClick={() => window.print()} 
-                className="bg-legal-800 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-legal-700 transition-colors flex items-center gap-2 print:hidden"
-             >
-                <FileText size={20} /> طباعة الملخص
-             </button>
-        </div>
+            </div>
+        ))}
     </div>
+  </div>
 );
 
-// --- Exit Ticket (Google Form Integration) ---
+// --- Exit Ticket ---
 export const ExitTicket: React.FC = () => {
-  return (
-    <div className="max-w-4xl mx-auto space-y-8 text-center h-full flex flex-col justify-center">
-       <div className="bg-white p-10 rounded-3xl shadow-2xl border-t-8 border-legal-900 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-legal-50 rounded-br-full -z-0"></div>
-          
-          <div className="mb-8 relative z-10">
-            <div className="w-20 h-20 bg-legal-100 text-legal-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-               <ClipboardCheck size={40} />
-            </div>
-            <h2 className="text-3xl font-bold text-legal-900 font-serif mb-2">بطاقة الخروج</h2>
-            <p className="text-legal-500 text-lg">تذكر: لا تخرج قبل أن تترك أثراً! رأيك يهمنا لتطوير المحاضرة.</p>
-          </div>
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [password, setPassword] = useState('');
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-             <a 
-               href={GOOGLE_FORM_URL} 
-               target="_blank" 
-               rel="noopener noreferrer"
-               className="bg-legal-900 hover:bg-gold-500 hover:text-legal-900 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-3 group"
-             >
-               <span>ملء الاستمارة الآن</span>
-               <ExternalLink size={24} className="group-hover:rotate-45 transition-transform"/>
-             </a>
-             
-             <a 
-                href={GOOGLE_FORM_RESPONSES_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white border-2 border-legal-200 text-legal-600 px-8 py-5 rounded-2xl font-bold text-lg hover:bg-legal-50 transition-colors flex items-center justify-center gap-2"
-             >
-                <Lock size={18} />
-                دخول الأستاذ (الردود)
-             </a>
-          </div>
-          
-          <p className="mt-8 text-sm text-gray-400 font-medium">سيتم فتح الاستمارة في نافذة جديدة آمنة عبر Google Forms</p>
-       </div>
+  return (
+    <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-soft p-10 border-t-8 border-legal-900 relative animate-fade-in text-center">
+      <div className="mb-10">
+        <div className="w-20 h-20 bg-legal-50 rounded-full flex items-center justify-center mx-auto mb-6 text-legal-900">
+            <ClipboardCheck size={40} />
+        </div>
+        <h2 className="text-3xl font-bold text-legal-900 font-serif mb-3">بطاقة الخروج الرقمية</h2>
+        <p className="text-legal-500 text-lg">شاركنا فهمك اليوم لنحسن من تجربتك التعليمية</p>
+      </div>
+      
+      <div className="space-y-6">
+         <p className="text-legal-700 leading-relaxed">
+             يرجى ملء النموذج القصير التالي لتوثيق حضورك وتقييم مدى استيعابك للمحاضرة.
+         </p>
+
+         <a 
+           href={GOOGLE_FORM_URL}
+           target="_blank" 
+           rel="noreferrer"
+           className="block w-full py-5 bg-legal-900 hover:bg-gold-500 hover:text-legal-900 text-white font-bold rounded-2xl transition-all shadow-lg text-xl flex items-center justify-center gap-3"
+         >
+           فتح بطاقة الخروج (Google Form) <ArrowRight size={20} className="rotate-180" />
+         </a>
+      </div>
+      
+      <div className="mt-8 pt-8 border-t border-legal-100 flex justify-center flex-col items-center gap-4">
+          {!showAdmin ? (
+            <button 
+              onClick={() => setShowAdmin(true)} 
+              className="text-xs text-legal-400 hover:text-legal-600 flex items-center gap-1 transition-colors"
+            >
+              <Lock size={12} /> دخول الأستاذ
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 animate-fade-in bg-legal-50 p-2 rounded-lg border border-legal-200">
+              {password !== 'omar2016' ? (
+                <input 
+                  type="password" 
+                  autoFocus
+                  placeholder="كلمة المرور" 
+                  className="text-xs p-1.5 rounded border border-legal-300 focus:outline-none focus:border-gold-500 w-32"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              ) : (
+                <a 
+                  href={GOOGLE_FORM_RESPONSES_URL} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-xs font-bold text-green-600 hover:text-green-800 flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-md border border-green-200"
+                >
+                   <Unlock size={12} /> عرض الردود (Google Sheets)
+                </a>
+              )}
+            </div>
+          )}
+      </div>
     </div>
   );
 };

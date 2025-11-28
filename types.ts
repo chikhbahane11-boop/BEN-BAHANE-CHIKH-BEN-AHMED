@@ -1,3 +1,4 @@
+
 import { LucideIcon } from 'lucide-react';
 
 export enum SectionId {
@@ -84,4 +85,22 @@ export interface DiscussionTopic {
 export interface SectionEnrichment {
   content: string;
   sourcePage?: string;
+}
+
+export interface ModernExampleItem {
+  old: string;
+  new: string;
+  period: string;
+}
+
+export interface SummaryCardData {
+  id: string;
+  title: string;
+  icon: LucideIcon;
+  colorClass: string;
+  content: {
+    subtitle?: string;
+    items: string[];
+    type: 'list' | 'timeline' | 'cards';
+  }[];
 }
